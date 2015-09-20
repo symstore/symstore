@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+
+import argparse
+import symstore
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="publish PDB files")
+
+    parser.add_argument("store_path", metavar="STORE_PATH",
+                        type=str,
+                        help="root directory of the symbol store")
+    parser.add_argument("files", metavar="FILE", type=str, nargs="+",
+                        help="PDB file(s) to publish")
+
+    parser.add_argument("-p", "--product", default="",
+                        help="name of the product")
+
+    parser.add_argument("-v", "--version", default="",
+                        help="version of the product")
+
+    return parser.parse_args()
+
+
+args = parse_args()
+
+sym_store = symstore.SymbolsStore(args.store_path)
+sym_store.add(args.files, args.product, args.version)
