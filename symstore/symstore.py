@@ -1,6 +1,7 @@
 import os
-import pdbparse
 import shutil
+import pdbparse
+import pefile
 from os import path
 from datetime import datetime
 
@@ -11,8 +12,14 @@ HISTORY_FILE = path.join(ADMIN_DIR, "history.txt")
 SERVER_FILE = path.join(ADMIN_DIR, "server.txt")
 PINGME_FILE = "pingme.txt"
 
+PDB_IMAGE, PE_IMAGE = range(2)
 
-def _parse_pdb_guid_age(filename):
+EXT_TYPES = dict(pdb=PDB_IMAGE,
+                 exe=PE_IMAGE,
+                 dll=PE_IMAGE)
+
+
+def _pdb_hash(filename):
     pdb = pdbparse.parse(filename, fast_load=True)
 
     pdb.STREAM_PDB.load()
@@ -20,7 +27,31 @@ def _parse_pdb_guid_age(filename):
     guid_str = "%.8X%.4X%.4X%s" % (guid.Data1, guid.Data2, guid.Data3,
                                    guid.Data4.encode("hex").upper())
 
-    return guid_str, pdb.STREAM_PDB.Age
+    return "%s%s" % (guid_str, pdb.STREAM_PDB.Age)
+
+
+def _pe_hash(file):
+    pe = pefile.PE(file, fast_load=True)
+
+    return "%X%X" % (pe.FILE_HEADER.TimeDateStamp,
+                     pe.OPTIONAL_HEADER.SizeOfImage)
+
+
+def _image_type(file):
+    file_ext = path.splitext(file)[1][1:].lower()
+    # TODO handle cases of unknown file extensions
+    return EXT_TYPES[file_ext]
+
+
+def _file_hash(file):
+
+    image_type = _image_type(file)
+
+    if image_type == PDB_IMAGE:
+        return _pdb_hash(file)
+
+    assert image_type == PE_IMAGE
+    return _pe_hash(file)
 
 
 def _new_or_empty(filename):
@@ -82,17 +113,14 @@ class SymbolsStore:
 
         return "%.010d" % next_id
 
-    def _store_pdb_file(self, pdb_file):
-        guid, age = _parse_pdb_guid_age(pdb_file)
-
-        pdb_dir = path.join(path.basename(pdb_file),
-                            "%s%s" % (guid, age))
-        dest_dir = path.join(self._path, pdb_dir)
+    def _store_file(self, file):
+        file_dir = path.join(path.basename(file), _file_hash(file))
+        dest_dir = path.join(self._path, file_dir)
 
         os.makedirs(dest_dir)
-        shutil.copy(pdb_file, dest_dir)
+        shutil.copy(file, dest_dir)
 
-        return pdb_dir
+        return file_dir
 
     def _write_transaction_file(self, transaction_id, added_entries):
         transaction_filename = path.join(self._admin_dir, transaction_id)
@@ -129,12 +157,11 @@ class SymbolsStore:
         self.create_dirs()
         trans_id = self._next_trans_id()
 
-        pdb_dirs = []
+        added_dirs = []
 
-        for pdb_file in files:
-            pdb_dir = self._store_pdb_file(pdb_file)
-            pdb_dirs.append(pdb_dir)
+        for file in files:
+            added_dirs.append(self._store_file(file))
 
-        self._write_transaction_file(trans_id, zip(pdb_dirs, files))
+        self._write_transaction_file(trans_id, zip(added_dirs, files))
         self._write_history(trans_start_time, trans_id, product, version)
         self._touch_pingme()
