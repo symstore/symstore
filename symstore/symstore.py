@@ -143,6 +143,10 @@ class SymbolsStore:
         line_break = "" if _new_or_empty(self._server_file) else "\n"
         _append_line(self._server_file, line_break + log_line)
 
+    def _write_transaction_id(self, trans_id):
+        with open(self._last_id_file, "w") as id_file:
+            id_file.write(trans_id)
+
     def _touch_pingme(self):
         pingme_path = self._pingme_file
 
@@ -164,4 +168,5 @@ class SymbolsStore:
 
         self._write_transaction_file(trans_id, zip(added_dirs, files))
         self._write_history(trans_start_time, trans_id, product, version)
+        self._write_transaction_id(trans_id)
         self._touch_pingme()
