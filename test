@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+
+import unittest
+import sys
+
+TESTS_DIR = "tests"
+
+
+def get_testsuite(argv):
+    test_loader = unittest.TestLoader()
+    if len(sys.argv) == 1:
+        # no test names specified, run all discovered tests
+        return test_loader.discover(TESTS_DIR)
+
+    test_names = ["%s.%s" % (TESTS_DIR, name) for name in argv[1:]]
+    return test_loader.loadTestsFromNames(test_names)
+
+
+unittest.TextTestRunner(verbosity=1).run(get_testsuite(sys.argv))
