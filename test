@@ -1,19 +1,32 @@
 #!/usr/bin/env python
 
 import unittest
-import sys
+import argparse
 
 TESTS_DIR = "tests"
 
 
-def get_testsuite(argv):
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="runs specified tests, "
+                    "or run all discovered tests if no are tests specified")
+
+    parser.add_argument("tests", metavar="test", nargs='*',
+                        help="test case to run")
+
+    return parser.parse_args()
+
+
+def get_testsuite(tests):
     test_loader = unittest.TestLoader()
-    if len(sys.argv) == 1:
+    if len(tests) == 0:
         # no test names specified, run all discovered tests
         return test_loader.discover(TESTS_DIR)
 
-    test_names = ["%s.%s" % (TESTS_DIR, name) for name in argv[1:]]
+    test_names = ["%s.%s" % (TESTS_DIR, name) for name in tests]
     return test_loader.loadTestsFromNames(test_names)
 
+args = parse_args()
+test_suites = get_testsuite(args.tests)
 
-unittest.TextTestRunner(verbosity=1).run(get_testsuite(sys.argv))
+unittest.TextTestRunner(verbosity=2).run(test_suites)
