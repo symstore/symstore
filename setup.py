@@ -1,8 +1,7 @@
 #!/usr/bin/env python
+import setuptools
 
-from distutils import core
-
-core.setup(
+setuptools.setup(
     name="symstore",
     version="0.1",
     install_requires=[
@@ -11,4 +10,12 @@ core.setup(
     ],
     packages=["symstore"],
     scripts=["symstore/bin/symstore"],
+
+    extras_require={
+        "develop":
+            [
+                "coverage",
+                "flake8"
+            ]
+    }
 )
