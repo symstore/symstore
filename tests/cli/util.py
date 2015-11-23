@@ -8,6 +8,10 @@ from datetime import datetime
 
 import symstore
 
+from tests import conf
+
+SYMSTORE_COMMAND = path.join("symstore", "bin", "symstore")
+
 SYMFILES_DIR = path.join(path.dirname(__file__), "symfiles")
 
 ADMIN_DIR = "000Admin"
@@ -97,9 +101,13 @@ class CliTester(unittest.TestCase):
         shutil.rmtree(self.symstore_path)
 
     def run_add_command(self, options, files):
+
         files = [path.join(SYMFILES_DIR, f) for f in files]
-        subprocess.check_call(["symstore",
-                               self.symstore_path] + options + files)
+        command = [SYMSTORE_COMMAND, self.symstore_path] + options + files
+        if conf.WITH_COVERAGE:
+            command = ["coverage", "run", "-p"] + command
+
+        subprocess.check_call(command)
 
     def _assert_transaction_num(self, expected, got):
         self.assertEqual(expected, got,

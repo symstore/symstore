@@ -2,6 +2,9 @@
 
 import unittest
 import argparse
+from contextlib import contextmanager
+
+from tests import conf
 
 TESTS_DIR = "tests"
 
@@ -13,6 +16,8 @@ def parse_args():
 
     parser.add_argument("tests", metavar="test", nargs='*',
                         help="test case to run")
+
+    parser.add_argument("--coverage", action="store_true", default=False)
 
     return parser.parse_args()
 
@@ -26,7 +31,28 @@ def get_testsuite(tests):
     test_names = ["%s.%s" % (TESTS_DIR, name) for name in tests]
     return test_loader.loadTestsFromNames(test_names)
 
+
+@contextmanager
+def coverage(enabled):
+    conf.WITH_COVERAGE = enabled
+
+    if enabled:
+        # only import coverage if we actually using
+        from coverage import Coverage
+        cov = Coverage(config_file=True, auto_data=True, data_suffix=True)
+        cov.start()
+
+        yield None
+
+        cov.stop()
+        cov.save()
+    else:
+        yield None
+
+
 args = parse_args()
+
 test_suites = get_testsuite(args.tests)
 
-unittest.TextTestRunner(verbosity=2).run(test_suites)
+with coverage(args.coverage):
+    unittest.TextTestRunner(verbosity=2).run(test_suites)
