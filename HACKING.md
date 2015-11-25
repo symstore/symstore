@@ -34,3 +34,25 @@ To run all tests and checks goto the root directory of the repository and type:
     $ make
 
 This will run all tests and perform flake8 static check on the code.
+
+### Make targets
+
+The Makefile provides following targets:
+
+    $ make flake8
+
+Runs flake8 tool on all the source code. Performs static checks and checks
+PEP8 style conformance.
+
+    $ make check
+
+Runs all the integration tests.
+
+    $ make cov
+
+Runs all the tests and generates a coverage report. Stores the report in
+'htmlcov' directory.
+
+    $ make all
+
+The default target. Will run flake8 checks and integrations tests.
