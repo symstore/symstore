@@ -15,7 +15,8 @@ setuptools.setup(
         "develop":
             [
                 "coverage",
-                "flake8"
+                "flake8",
+                "mock"
             ]
     }
 )
