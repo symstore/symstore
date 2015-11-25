@@ -167,9 +167,6 @@ class Transactions:
             self._transactions = self._parse_server_file()
         return self._transactions
 
-    def __getitem__(self, item):
-        return self._get_transactions()[item]
-
     def items(self):
         return self._get_transactions().items()
 
