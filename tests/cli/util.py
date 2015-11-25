@@ -87,10 +87,13 @@ def _file_part(path):
 class CliTester(unittest.TestCase):
     initial_dir_zip = None
 
-    def setUp(self):
+    def recordStartTime(self):
         # record test's start time, used to verify created symstore's
         # modify timestamp
         self.start_timestamp = datetime.now()
+
+    def setUp(self):
+        self.recordStartTime()
 
         self.symstore_path = tempfile.mkdtemp()
         zfile = _open_zip(self.initial_dir_zip)
