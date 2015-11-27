@@ -21,7 +21,7 @@ class TestNewStore(util.CliTester):
         shutil.rmtree(path.dirname(self.symstore_path))
 
     def test_add_pdb(self):
-        self.run_add_command(["--product", "dummyprod"],
+        self.run_add_command(["--product-name", "dummyprod"],
                              ["dummyprog.pdb"])
         self.assertSymstoreDir("new_store.zip")
 
@@ -30,7 +30,7 @@ class TestExistingStore(util.CliTester):
     initial_dir_zip = "new_store.zip"
 
     def test_add_pdb(self):
-        self.run_add_command(["--product", "dummylib"],
+        self.run_add_command(["--product-name", "dummylib"],
                              ["dummylib.pdb"])
         self.assertSymstoreDir("existing_store.zip")
 
@@ -39,6 +39,7 @@ class TestPublishPE(util.CliTester):
     initial_dir_zip = "existing_store.zip"
 
     def test_add_pdb(self):
-        self.run_add_command(["--product", "peprods", "--version", "1.0.1"],
+        self.run_add_command(["--product-name", "peprods",
+                              "--product-version", "1.0.1"],
                              ["dummyprog.exe", "dummylib.dll"])
         self.assertSymstoreDir("pe_store.zip")

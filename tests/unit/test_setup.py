@@ -1,5 +1,6 @@
 import mock
 import unittest
+import symstore
 
 
 class TestSetup(unittest.TestCase):
@@ -8,8 +9,9 @@ class TestSetup(unittest.TestCase):
         import setup  # noqa
 
         setup_mock.assert_called_once_with(name="symstore",
-                                           version=mock.ANY,
+                                           version=symstore.VERSION,
                                            packages=mock.ANY,
+                                           package_data=mock.ANY,
                                            scripts=mock.ANY,
                                            install_requires=mock.ANY,
                                            extras_require=mock.ANY)

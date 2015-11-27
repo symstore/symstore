@@ -14,4 +14,4 @@ cov:
 	coverage html
 
 loc:
-	@wc $(shell find . -name "*.py")
+	@wc $(shell find . -name "*.py") symstore/bin/symstore
