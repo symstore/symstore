@@ -10,6 +10,10 @@ class TestSetup(unittest.TestCase):
 
         setup_mock.assert_called_once_with(name="symstore",
                                            version=symstore.VERSION,
+                                           description=mock.ANY,
+                                           url=mock.ANY,
+                                           classifiers=mock.ANY,
+                                           keywords=mock.ANY,
                                            packages=mock.ANY,
                                            package_data=mock.ANY,
                                            scripts=mock.ANY,
