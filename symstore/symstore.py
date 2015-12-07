@@ -31,6 +31,7 @@ EXT_TYPES = dict(pdb=PDB_IMAGE,
 
 def _pdb_hash(filename):
     pdb = pdbparse.parse(filename, fast_load=True)
+    # TODO 'ValueError: Unsupported file type' exception
 
     pdb.STREAM_PDB.load()
     guid = pdb.STREAM_PDB.GUID
