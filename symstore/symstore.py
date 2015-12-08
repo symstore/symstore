@@ -3,6 +3,7 @@ import re
 import shutil
 import pdbparse
 import pefile
+import binascii
 from os import path
 from datetime import datetime
 
@@ -35,8 +36,9 @@ def _pdb_hash(filename):
 
     pdb.STREAM_PDB.load()
     guid = pdb.STREAM_PDB.GUID
-    guid_str = "%.8X%.4X%.4X%s" % (guid.Data1, guid.Data2, guid.Data3,
-                                   guid.Data4.encode("hex").upper())
+    guid_str = "%.8X%.4X%.4X%s" % \
+               (guid.Data1, guid.Data2, guid.Data3,
+                binascii.hexlify(guid.Data4).decode("utf-8").upper())
 
     return "%s%s" % (guid_str, pdb.STREAM_PDB.Age)
 
