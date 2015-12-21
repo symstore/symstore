@@ -1,10 +1,12 @@
+from __future__ import absolute_import
+
 import os
 import re
 import shutil
 import pdbparse
-import pefile
 import binascii
 from os import path
+from symstore import pe
 from datetime import datetime
 
 TRANSACTION_LINE_RE = re.compile(
@@ -44,10 +46,9 @@ def _pdb_hash(filename):
 
 
 def _pe_hash(file):
-    pe = pefile.PE(file, fast_load=True)
+    pefile = pe.PEFile(file)
 
-    return "%X%X" % (pe.FILE_HEADER.TimeDateStamp,
-                     pe.OPTIONAL_HEADER.SizeOfImage)
+    return "%X%X" % (pefile.TimeDateStamp, pefile.SizeOfImage)
 
 
 def _image_type(file):

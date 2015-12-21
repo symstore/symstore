@@ -16,7 +16,6 @@ setuptools.setup(
     keywords="development symstore pdb",
     install_requires=[
         "pdbparse",
-        "pefile",
         "construct"
     ],
     packages=["symstore"],
