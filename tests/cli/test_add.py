@@ -1,7 +1,7 @@
 from os import path
 import tempfile
 import shutil
-import util
+from tests.cli import util
 
 
 class TestNewStore(util.CliTester):
