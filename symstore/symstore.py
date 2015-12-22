@@ -90,7 +90,7 @@ class TransactionEntry:
         fpath = path.join(self._symstore._path, self.file_name,
                           self.file_hash, self.file_name)
 
-        return open(fpath, "r")
+        return open(fpath, "rb")
 
 
 class Transaction:

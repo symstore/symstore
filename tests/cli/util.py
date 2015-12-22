@@ -1,3 +1,4 @@
+import io
 import unittest
 import tempfile
 import shutil
@@ -35,14 +36,15 @@ class ZipTransaction(symstore.Transaction):
     transaction_entry_class = ZipTransactionEntry
 
     def _entries_file(self):
-        return self._symstore._zfile.open("%s/%s" % (ADMIN_DIR, self.id))
+        name = "%s/%s" % (ADMIN_DIR, self.id)
+        return io.TextIOWrapper(self._symstore._zfile.open(name))
 
 
 class ZipTransactions(symstore.Transactions):
     transaction_class = ZipTransaction
 
     def _server_file(self):
-        return self._symstore._zfile.open(SERVER_FILE)
+        return io.TextIOWrapper(self._symstore._zfile.open(SERVER_FILE))
 
     def _server_file_exists(self):
         return True
@@ -52,7 +54,7 @@ class ZipHistory(symstore.History):
     transaction_class = ZipTransaction
 
     def _history_file(self):
-        return self._symstore._zfile.open(HISTORY_FILE)
+        return io.TextIOWrapper(self._symstore._zfile.open(HISTORY_FILE))
 
     def _history_file_exists(self):
         return True
