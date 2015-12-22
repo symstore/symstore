@@ -21,7 +21,7 @@ class TestEmpty(unittest.TestCase):
         self.assertEqual(len(self.symstore.history), 0)
 
     def test_transactions(self):
-        self.assertEqual(self.symstore.transactions.items(), [])
+        self.assertEqual(list(self.symstore.transactions.items()), [])
 
     def test_transactions_caching(self):
         """
