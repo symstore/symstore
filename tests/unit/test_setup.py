@@ -11,6 +11,7 @@ class TestSetup(unittest.TestCase):
         setup_mock.assert_called_once_with(name="symstore",
                                            version=symstore.VERSION,
                                            description=mock.ANY,
+                                           long_description=mock.ANY,
                                            url=mock.ANY,
                                            classifiers=mock.ANY,
                                            keywords=mock.ANY,
