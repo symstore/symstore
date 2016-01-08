@@ -21,12 +21,7 @@ HISTORY_FILE = "%s/%s" % (ADMIN_DIR, "history.txt")
 SERVER_FILE = "%s/%s" % (ADMIN_DIR, "server.txt")
 
 
-class ZipTransactionEntry:
-    def __init__(self, symstore, data_path, source_file):
-        self._symstore = symstore
-        self.file_name, self.file_hash = data_path.split("\\")
-        self.source_file = source_file
-
+class ZipTransactionEntry(symstore.TransactionEntry):
     def open(self):
         name = "%s/%s/%s" % (self.file_name, self.file_hash, self.file_name)
         return self._symstore._zfile.open(name)

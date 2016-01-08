@@ -68,22 +68,11 @@ def _file_hash(file):
     return _pe_hash(file)
 
 
-def _new_or_empty(filename):
-    if not path.isfile(filename):
-        return True
-
-    return os.stat(filename).st_size == 0
-
-
-def _append_line(filename, line):
-    with open(filename, "a") as f:
-        f.write("%s" % line)
-
-
 class TransactionEntry:
-    def __init__(self, symstore, data_path, source_file):
+    def __init__(self, symstore, file_name, file_hash, source_file):
         self._symstore = symstore
-        self.file_name, self.file_hash = data_path.split("\\")
+        self.file_name = file_name
+        self.file_hash = file_hash
         self.source_file = source_file
 
     def open(self):
@@ -92,14 +81,31 @@ class TransactionEntry:
 
         return open(fpath, "rb")
 
+    def publish(self):
+        """
+        publish this entry's source file inside symstore
+        """
+        dest_dir = path.join(self._symstore._path,
+                             self.file_name,
+                             self.file_hash)
+        os.makedirs(dest_dir)
+        shutil.copy(self.source_file, dest_dir)
+        # TODO handle I/O errors
+
+    def __str__(self):
+        return """"%s\%s","%s""""" % \
+               (self.file_name, self.file_hash,
+                path.abspath(self.source_file))
+
 
 class Transaction:
     transaction_entry_class = TransactionEntry
 
-    def __init__(self, symstore, id, type, ref,  timestamp, product,
-                 version, comment):
+    def __init__(self, symstore, id=None, type="add", ref="file",
+                 timestamp=None, product=None, version=None, comment=None):
 
         self._symstore = symstore
+        self._entries = None
         self.id = id
         self.type = type
         self.ref = ref
@@ -108,19 +114,27 @@ class Transaction:
         self.version = version
         self.comment = comment
 
-    def _entries_file(self):
-        return open(path.join(self._symstore._admin_dir, self.id))
+    def _commited(self):
+        return self.id is not None
 
-    @property
-    def entries(self):
+    def _entries_file(self, mode="r"):
+        return open(path.join(self._symstore._admin_dir, self.id),
+                    mode=mode)
+
+    def _load_entries(self):
+        if not self._commited():
+            return []
+
         entries = []
         with self._entries_file() as efile:
             for line in efile.readlines():
                 entry, source_file = [
                     s.strip("\"") for s in line.strip().split(",")]
 
+                file_name, file_hash = entry.split("\\")
+
                 transaction_entry = self.transaction_entry_class(
-                    self._symstore, entry, source_file)
+                    self._symstore, file_name, file_hash, source_file)
 
                 entries.append(transaction_entry)
 
@@ -129,8 +143,51 @@ class Transaction:
 
         return entries
 
+    def add_file(self, file):
+        entry = TransactionEntry(self._symstore,
+                                 path.basename(file),
+                                 _file_hash(file),
+                                 file)
+        # TODO handle I/O errors from _file_hash()
+
+        self.entries.append(entry)
+
+    @property
+    def entries(self):
+        if self._entries is None:
+            self._entries = self._load_entries()
+
+        return self._entries
+
+    def commit(self, id):
+        assert not self._commited()
+
+        self.timestamp = datetime.now()
+
+        self.id = id
+
+        # publish all entries files to the store
+        for entry in self.entries:
+            entry.publish()
+
+        # write new transaction file
+        with self._entries_file("a") as efile:
+            for entry in self.entries:
+                efile.write("%s\n" % entry)
+        # TODO handle I/O errors while opening/writing efile
+
+    def __str__(self):
+        date_stamp = self.timestamp.strftime("%m/%d/%Y")
+        time_stamp = self.timestamp.strftime("%H:%M:%S")
+
+        assert self._commited()
+        return """%s,%s,%s,%s,%s,"%s","%s","",""" % \
+               (self.id, self.type, self.ref, date_stamp, time_stamp,
+                self.product, self.version)
+
 
 def parse_transaction_line(line):
+    # TODO handle parse errors in this function
     (id, type, ref, timestamp, product, version, comment) = \
         TRANSACTION_LINE_RE.match(line).groups()
 
@@ -145,8 +202,8 @@ class Transactions:
         self._symstore = symstore
         self._transactions = None
 
-    def _server_file(self):
-        return open(self._symstore._server_file)
+    def _server_file(self, mode="r"):
+        return open(self._symstore._server_file, mode=mode)
 
     def _server_file_exists(self):
         return path.isfile(self._symstore._server_file)
@@ -174,6 +231,11 @@ class Transactions:
     def items(self):
         return self._get_transactions().items()
 
+    def add(self, transaction):
+        with self._server_file("a") as sfile:
+            sfile.write("%s\n" % transaction)
+        # TODO handle I/O errors
+
 
 class History:
     transaction_class = Transaction
@@ -182,8 +244,8 @@ class History:
         self._symstore = symstore
         self._transactions = None
 
-    def _history_file(self):
-        return open(self._symstore._history_file)
+    def _history_file(self, mode="r"):
+        return open(self._symstore._history_file, mode=mode)
 
     def _history_file_exists(self):
         return path.isfile(self._symstore._history_file)
@@ -213,6 +275,15 @@ class History:
 
     def __getitem__(self, item):
         return self._get_transactions()[item]
+
+    def add(self, transaction):
+        with self._history_file("a") as hfile:
+            if hfile.tell() != 0:
+                # add line break if appending to existing non-empty file
+                hfile.write("\n")
+            hfile.write("%s" % transaction)
+
+        # TODO handle I/O errors
 
 
 class Store:
@@ -271,40 +342,6 @@ class Store:
 
         return "%.010d" % (last_id + 1)
 
-    def _store_file(self, file):
-        file_dir = path.join(path.basename(file), _file_hash(file))
-        dest_dir = path.join(self._path, file_dir)
-
-        os.makedirs(dest_dir)
-        shutil.copy(file, dest_dir)
-
-        return file_dir
-
-    def _write_transaction_file(self, transaction_id, added_entries):
-        transaction_filename = path.join(self._admin_dir, transaction_id)
-        with open(transaction_filename, "w") as transfile:
-            for pdb_dir, file in added_entries:
-                pdb_dir = pdb_dir.replace("/", "\\")
-                file = path.abspath(file)
-                transfile.write("\"%s\",\"%s\"\n" % (pdb_dir, file))
-        # TODO handle file write errors
-
-    def _record_transaction(self, start_time, transaction_id,
-                            product, version):
-        """
-        Record new transaction in history.txt and server.txt files.
-        """
-        date_stamp = start_time.strftime("%m/%d/%Y")
-        time_stamp = start_time.strftime("%H:%M:%S")
-
-        log_line = """%s,add,file,%s,%s,"%s","%s","",""" % \
-                   (transaction_id, date_stamp, time_stamp, product, version)
-
-        _append_line(self._server_file, log_line + "\n")
-
-        line_break = "" if _new_or_empty(self._history_file) else "\n"
-        _append_line(self._history_file, line_break + log_line)
-
     def _write_transaction_id(self, trans_id):
         with open(self._last_id_file, "w") as id_file:
             id_file.write(trans_id)
@@ -318,17 +355,16 @@ class Store:
 
         os.utime(pingme_path, None)
 
-    def add(self, files, product, version):
-        trans_start_time = datetime.now()
+    def new_transaction(self, product, version, type="add"):
+        return Transaction(self, type=type, product=product, version=version)
+
+    def commit(self, transaction):
         self._create_dirs()
-        trans_id = self._next_transaction_id()
 
-        added_dirs = []
+        transaction.commit(self._next_transaction_id())
 
-        for file in files:
-            added_dirs.append(self._store_file(file))
+        self.transactions.add(transaction)
+        self.history.add(transaction)
 
-        self._write_transaction_file(trans_id, zip(added_dirs, files))
-        self._record_transaction(trans_start_time, trans_id, product, version)
-        self._write_transaction_id(trans_id)
+        self._write_transaction_id(transaction.id)
         self._touch_pingme()

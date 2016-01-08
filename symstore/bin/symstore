@@ -30,4 +30,12 @@ def parse_args():
 args = parse_args()
 
 sym_store = symstore.Store(args.store_path)
-sym_store.add(args.files, args.product_name, args.product_version)
+
+# create new add transaction, add all specified files
+transaction = sym_store.new_transaction(args.product_name,
+                                        args.product_version)
+for file in args.files:
+    transaction.add_file(file)
+
+# commit the transaction to the store
+sym_store.commit(transaction)
