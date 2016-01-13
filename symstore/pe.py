@@ -1,3 +1,4 @@
+import os
 import io
 import struct
 
@@ -34,6 +35,22 @@ OPTIONAL_HEADER_OFFSET = \
 SIZE_OF_IMAGE_OFFSET = 56
 
 
+def _read_i32(file, size, offset):
+    """
+    Read 32-bit little-endian integer from an opened file.
+
+    :param file: opended file handle
+    :param size: file szie
+    :param offset: the offset of the integer
+    """
+    if offset + 4 > size:
+        raise Exception("out-of-bands")
+
+    file.seek(offset)
+
+    return struct.unpack("<i", file.read(4))[0]
+
+
 class PEFile:
     """
     Simple PE file parser, that loads two fields used by symstore:
@@ -48,10 +65,12 @@ class PEFile:
     """
     def __init__(self, filepath):
         with io.open(filepath, "rb") as f:
+            fsize = os.fstat(f.fileno()).st_size
+
             f.seek(PE_SIGNATURE_POINTER)
 
             # load PE signature offset
-            pe_sig_offset, = struct.unpack("<i", f.read(4))
+            pe_sig_offset = _read_i32(f, fsize, PE_SIGNATURE_POINTER)
 
             # check that file contains valid PE signature
             f.seek(pe_sig_offset)
@@ -59,11 +78,11 @@ class PEFile:
                 raise ValueError("PE signature not found")
 
             # load TimeDateStamp field
-            f.seek(pe_sig_offset+TIME_DATE_STAMP_OFFSET)
-            self.TimeDateStamp, = struct.unpack("<i", f.read(4))
+            self.TimeDateStamp = \
+                _read_i32(f, fsize, pe_sig_offset+TIME_DATE_STAMP_OFFSET)
 
             # load SizeOfImage field
-            f.seek(pe_sig_offset +
-                   OPTIONAL_HEADER_OFFSET +
-                   SIZE_OF_IMAGE_OFFSET)
-            self.SizeOfImage, = struct.unpack("<i", f.read(4))
+            self.SizeOfImage = _read_i32(f, fsize,
+                                         pe_sig_offset +
+                                         OPTIONAL_HEADER_OFFSET +
+                                         SIZE_OF_IMAGE_OFFSET)
