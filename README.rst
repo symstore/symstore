@@ -46,3 +46,12 @@ Python module
 
 To publish symbols programmatically use the ``symstore`` module.
 See ``symstore/bin/symstore`` for an example on how to use the API.
+
+Change Log
+==========
+
+0.1.0 (14 January 2016)
+-----------------------
+
+* dropped dependency to pefile module
+* print nice error message on currupt PE files
