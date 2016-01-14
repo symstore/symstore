@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import os
 import re
+import time
 import shutil
 import pdbparse
 import binascii
@@ -162,11 +163,10 @@ class Transaction:
 
         return self._entries
 
-    def commit(self, id):
+    def commit(self, id, now):
         assert not self._commited()
 
-        self.timestamp = datetime.now()
-
+        self.timestamp = now
         self.id = id
 
         # publish all entries files to the store
@@ -349,14 +349,13 @@ class Store:
         with open(self._last_id_file, "w") as id_file:
             id_file.write(trans_id)
 
-    def _touch_pingme(self):
+    def _touch_pingme(self, timestamp):
         pingme_path = self._pingme_file
 
         if not path.isfile(pingme_path):
             open(pingme_path, "a")
-            return
 
-        os.utime(pingme_path, None)
+        os.utime(pingme_path, (timestamp, timestamp))
 
     def new_transaction(self, product, version, type="add"):
         return Transaction(self, type=type, product=product, version=version)
@@ -364,10 +363,13 @@ class Store:
     def commit(self, transaction):
         self._create_dirs()
 
-        transaction.commit(self._next_transaction_id())
+        now = round(time.time())
+
+        transaction.commit(self._next_transaction_id(),
+                           datetime.fromtimestamp(now))
 
         self.transactions.add(transaction)
         self.history.add(transaction)
 
         self._write_transaction_id(transaction.id)
-        self._touch_pingme()
+        self._touch_pingme(now)

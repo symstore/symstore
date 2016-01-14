@@ -1,6 +1,7 @@
 import io
 import unittest
 import tempfile
+import time
 import shutil
 import zipfile
 import subprocess
@@ -99,7 +100,7 @@ class CliTester(unittest.TestCase):
     def recordStartTime(self):
         # record test's start time, used to verify created symstore's
         # modify timestamp
-        self.start_timestamp = datetime.now()
+        self.start_timestamp = datetime.fromtimestamp(round(time.time()))
 
     def setUp(self):
         self.recordStartTime()
