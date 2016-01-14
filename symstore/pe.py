@@ -35,6 +35,10 @@ OPTIONAL_HEADER_OFFSET = \
 SIZE_OF_IMAGE_OFFSET = 56
 
 
+class PEFormatError(Exception):
+    pass
+
+
 def _read_i32(file, size, offset):
     """
     Read 32-bit little-endian integer from an opened file.
@@ -44,7 +48,8 @@ def _read_i32(file, size, offset):
     :param offset: the offset of the integer
     """
     if offset + 4 > size:
-        raise Exception("out-of-bands")
+        raise PEFormatError("data offset %s beyond end of file %s" %
+                            (offset, size))
 
     file.seek(offset)
 
@@ -67,15 +72,13 @@ class PEFile:
         with io.open(filepath, "rb") as f:
             fsize = os.fstat(f.fileno()).st_size
 
-            f.seek(PE_SIGNATURE_POINTER)
-
             # load PE signature offset
             pe_sig_offset = _read_i32(f, fsize, PE_SIGNATURE_POINTER)
 
             # check that file contains valid PE signature
             f.seek(pe_sig_offset)
             if f.read(4) != PE_SIGNATURE:
-                raise ValueError("PE signature not found")
+                raise PEFormatError("PE signature not found")
 
             # load TimeDateStamp field
             self.TimeDateStamp = \

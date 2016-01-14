@@ -81,6 +81,18 @@ def _file_part(path):
     return path[sep_pos+1:]
 
 
+def run_script(symstore_path, files, options=[]):
+    files = [path.join(SYMFILES_DIR, f) for f in files]
+    command = [SYMSTORE_COMMAND, symstore_path] + options + files
+    if conf.WITH_COVERAGE:
+        command = ["coverage", "run", "-p"] + command
+
+    proc = subprocess.Popen(command, stderr=subprocess.PIPE)
+    _, stderr = proc.communicate()
+
+    return proc.returncode, stderr
+
+
 class CliTester(unittest.TestCase):
     initial_dir_zip = None
 
@@ -101,13 +113,8 @@ class CliTester(unittest.TestCase):
         shutil.rmtree(self.symstore_path)
 
     def run_add_command(self, options, files):
-
-        files = [path.join(SYMFILES_DIR, f) for f in files]
-        command = [SYMSTORE_COMMAND, self.symstore_path] + options + files
-        if conf.WITH_COVERAGE:
-            command = ["coverage", "run", "-p"] + command
-
-        subprocess.check_call(command)
+        retcode, _ = run_script(self.symstore_path, files, options)
+        self.assertEqual(retcode, 0)
 
     def _assert_transaction_num(self, expected, got):
         self.assertEqual(expected, got,

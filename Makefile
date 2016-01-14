@@ -1,7 +1,7 @@
 all: check flake8
 
 flake8:
-	flake8 . test
+	flake8 . test symstore/bin/symstore
 
 check:
 	./test

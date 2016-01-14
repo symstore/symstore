@@ -144,6 +144,9 @@ class Transaction:
         return entries
 
     def add_file(self, file):
+        """
+        :raises pe.PEFormatError: on errors parsing PE (.exe/.dll) files
+        """
         entry = TransactionEntry(self._symstore,
                                  path.basename(file),
                                  _file_hash(file),

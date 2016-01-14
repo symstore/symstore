@@ -1,6 +1,6 @@
-from os import path
 import tempfile
 import shutil
+from os import path
 from tests.cli import util
 
 

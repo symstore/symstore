@@ -5,7 +5,8 @@ from symstore.symstore import Transactions
 from symstore.symstore import History
 from symstore.symstore import Transaction
 from symstore.symstore import TransactionEntry
+from symstore.pe import PEFormatError
 from symstore.version import VERSION
 
 __all__ = ["Store", "Transactions", "History", "Transaction",
-           "TransactionEntry", "VERSION"]
+           "TransactionEntry", "PEFormatError", "VERSION"]
