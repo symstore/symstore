@@ -15,10 +15,6 @@ setuptools.setup(
         "Programming Language :: Python :: 2.7",
     ],
     keywords="development symstore pdb",
-    install_requires=[
-        "pdbparse",
-        "construct"
-    ],
     packages=["symstore"],
     package_data={"symstore": ["VERSION"]},
     scripts=["symstore/bin/symstore"],

@@ -4,10 +4,9 @@ import os
 import re
 import time
 import shutil
-import pdbparse
-import binascii
 from os import path
 from symstore import pe
+from symstore import pdb
 from datetime import datetime
 
 TRANSACTION_LINE_RE = re.compile(
@@ -34,16 +33,8 @@ EXT_TYPES = dict(pdb=PDB_IMAGE,
 
 
 def _pdb_hash(filename):
-    pdb = pdbparse.parse(filename, fast_load=True)
-    # TODO 'ValueError: Unsupported file type' exception
-
-    pdb.STREAM_PDB.load()
-    guid = pdb.STREAM_PDB.GUID
-    guid_str = "%.8X%.4X%.4X%s" % \
-               (guid.Data1, guid.Data2, guid.Data3,
-                binascii.hexlify(guid.Data4).decode("utf-8").upper())
-
-    return "%s%s" % (guid_str, pdb.STREAM_PDB.Age)
+    pdbfile = pdb.PDBFile(filename)
+    return "%s%s" % (pdbfile.guid, pdbfile.age)
 
 
 def _pe_hash(file):

@@ -18,5 +18,4 @@ class TestSetup(unittest.TestCase):
                                            packages=mock.ANY,
                                            package_data=mock.ANY,
                                            scripts=mock.ANY,
-                                           install_requires=mock.ANY,
                                            extras_require=mock.ANY)

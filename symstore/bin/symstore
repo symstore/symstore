@@ -41,6 +41,6 @@ try:
 
     # commit the transaction to the store
     sym_store.commit(transaction)
-except symstore.PEFormatError as e:
-    sys.stderr.write("%s: invalid PE file\n" % file)
+except symstore.FileFormatError as e:
+    sys.stderr.write("%s: invalid %s file: %s\n" % (file, e.format_name, e))
     sys.exit(1)

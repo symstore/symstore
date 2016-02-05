@@ -1,6 +1,9 @@
+from __future__ import absolute_import
+
 import os
 import io
 import struct
+from symstore import errs
 
 PE_SIGNATURE = b"PE\0\0"
 PE_SIGNATURE_POINTER = 0x3C
@@ -35,8 +38,8 @@ OPTIONAL_HEADER_OFFSET = \
 SIZE_OF_IMAGE_OFFSET = 56
 
 
-class PEFormatError(Exception):
-    pass
+class PEFormatError(errs.FileFormatError):
+    format_name = "PE"
 
 
 def _read_i32(file, size, offset):
