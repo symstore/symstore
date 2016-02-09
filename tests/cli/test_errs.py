@@ -5,7 +5,7 @@ from tests.cli import util
 class TestInvalidPEFile(unittest.TestCase):
     def assertInvalidPEMsg(self, retcode, msg, type, filename):
         self.assertEqual(retcode, 1)
-        self.assertRegexpMatches(msg,
+        self.assertRegexpMatches(msg.decode(),
                                  ".*%s: invalid %s file:.*\n" %
                                  (filename, type), "unexpected error message")
 

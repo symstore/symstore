@@ -104,7 +104,7 @@ class Root:
 
         pages_offset = 4 + 4 * num_streams
 
-        for sidx in xrange(stream_index):
+        for sidx in range(stream_index):
             stream_size = self.stream_size(sidx)
             stream_num_pages = pages(stream_size, self.page_size)
             pages_offset += stream_num_pages * 4
