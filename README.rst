@@ -50,6 +50,12 @@ See ``symstore/bin/symstore`` for an example on how to use the API.
 Change Log
 ==========
 
+0.1.1 (10 February 2016)
+------------------------
+
+* dropped dependency to pdbparse and construct modules
+* added support for python 3
+
 0.1.0 (14 January 2016)
 -----------------------
 
