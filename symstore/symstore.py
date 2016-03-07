@@ -7,6 +7,7 @@ import shutil
 from os import path
 from symstore import pe
 from symstore import pdb
+from symstore import cab
 from datetime import datetime
 
 TRANSACTION_LINE_RE = re.compile(
@@ -61,11 +62,12 @@ def _file_hash(file):
 
 
 class TransactionEntry:
-    def __init__(self, symstore, file_name, file_hash, source_file):
+    def __init__(self, symstore, file_name, file_hash, source_file, compressed=False):
         self._symstore = symstore
         self.file_name = file_name
         self.file_hash = file_hash
         self.source_file = source_file
+        self.compressed = compressed
 
     def open(self):
         fpath = path.join(self._symstore._path, self.file_name,
@@ -81,8 +83,12 @@ class TransactionEntry:
                              self.file_name,
                              self.file_hash)
         os.makedirs(dest_dir)
-        shutil.copy(self.source_file, dest_dir)
-        # TODO handle I/O errors
+        if self.compressed:
+            cab.compress(self.source_file,
+                         path.join(dest_dir, self.file_name[:-1]+"_"))
+        else:
+            shutil.copy(self.source_file, dest_dir)
+            # TODO handle I/O errors
 
     def __str__(self):
         return """"%s\%s","%s""""" % \
@@ -135,14 +141,15 @@ class Transaction:
 
         return entries
 
-    def add_file(self, file):
+    def add_file(self, file, compress=False):
         """
         :raises pe.PEFormatError: on errors parsing PE (.exe/.dll) files
         """
         entry = TransactionEntry(self._symstore,
                                  path.basename(file),
                                  _file_hash(file),
-                                 file)
+                                 file,
+                                 compress)
         # TODO handle I/O errors from _file_hash()
 
         self.entries.append(entry)
