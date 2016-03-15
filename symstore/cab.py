@@ -2,6 +2,7 @@ from os import path
 from gi.repository import GCab
 from gi.repository import Gio
 
+
 def compress(src_path, dest_path):
     cab_file = GCab.File.new_with_file(path.basename(src_path),
                                        Gio.File.new_for_path(src_path))

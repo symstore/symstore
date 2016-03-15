@@ -62,16 +62,40 @@ def _file_hash(file):
 
 
 class TransactionEntry:
-    def __init__(self, symstore, file_name, file_hash, source_file, compressed=False):
+    def __init__(self, symstore, file_name, file_hash, source_file,
+                 compressed=False):
         self._symstore = symstore
         self.file_name = file_name
         self.file_hash = file_hash
         self.source_file = source_file
         self.compressed = compressed
 
+    @classmethod
+    def load(cls, symstore, file_name, file_hash, source_file):
+        """
+        Load transaction from disk.
+
+        Examine files in symstore directory and create an transaction
+        entry object that represents it.
+        """
+
+        # check if data file is compressed
+        compressed_path = path.join(symstore._path, file_name,
+                                    file_hash, file_name[:-1]+"_")
+        # if both compressed and uncompressed versions of the file exists,
+        # give preference to the compressed one
+        compressed = path.isfile(compressed_path)
+
+        return cls(symstore, file_name, file_hash, source_file, compressed)
+
+    def _dest_dir(self):
+        return path.join(self._symstore._path, self.file_name, self.file_hash)
+
     def open(self):
-        fpath = path.join(self._symstore._path, self.file_name,
-                          self.file_hash, self.file_name)
+        if self.compressed:
+            raise NotImplementedError("reading compressed data not supported")
+
+        fpath = path.join(self._dest_dir(), self.file_name)
 
         return open(fpath, "rb")
 
@@ -79,9 +103,8 @@ class TransactionEntry:
         """
         publish this entry's source file inside symstore
         """
-        dest_dir = path.join(self._symstore._path,
-                             self.file_name,
-                             self.file_hash)
+        dest_dir = self._dest_dir()
+
         os.makedirs(dest_dir)
         if self.compressed:
             cab.compress(self.source_file,
@@ -131,7 +154,7 @@ class Transaction:
 
                 file_name, file_hash = entry.split("\\")
 
-                transaction_entry = self.transaction_entry_class(
+                transaction_entry = self.transaction_entry_class.load(
                     self._symstore, file_name, file_hash, source_file)
 
                 entries.append(transaction_entry)

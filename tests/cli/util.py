@@ -23,8 +23,29 @@ SERVER_FILE = "%s/%s" % (ADMIN_DIR, "server.txt")
 
 
 class ZipTransactionEntry(symstore.TransactionEntry):
+    @staticmethod
+    def _archive_name(file_name, file_hash, compressed=False):
+        name = "%s/%s/%s" % (file_name, file_hash, file_name)
+
+        if compressed:
+            name = name[:-1]+"_"
+
+        return name
+
+    @classmethod
+    def load(cls, symstore, file_name, file_hash, source_file):
+        compressed_name = ZipTransactionEntry._archive_name(
+            file_name, file_hash, True)
+        compressed = compressed_name in symstore._zfile.namelist()
+
+        return cls(symstore, file_name, file_hash, source_file, compressed)
+
     def open(self):
-        name = "%s/%s/%s" % (self.file_name, self.file_hash, self.file_name)
+        if self.compressed:
+            raise NotImplementedError("reading compressed data not supported")
+
+        name = ZipTransactionEntry._archive_name(self.file_name,
+                                                 self.file_hash)
         return self._symstore._zfile.open(name)
 
 
@@ -145,10 +166,15 @@ class CliTester(unittest.TestCase):
                              "expected '%s'. got '%s'" %
                              (transaction_id, exp_src_file, got_src_file))
 
-            self.assertEqual(expected.open().read(),
-                             got.open().read(),
-                             "Unexpected contents for %s/%s" %
-                             (expected.file_name, expected.file_hash))
+            self.assertEquals(expected.compressed, got.compressed)
+
+            if not expected.compressed:
+                # as we don't support reading compressed entries data,
+                # check data only for uncompressed entries
+                self.assertEqual(expected.open().read(),
+                                 got.open().read(),
+                                 "Unexpected contents for %s/%s" %
+                                 (expected.file_name, expected.file_hash))
 
     def _assert_transaction_metadata(self, expected, got, modify_timestamp):
         for attrname in ["id", "type", "ref", "product", "version", "comment"]:

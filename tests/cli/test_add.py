@@ -23,7 +23,12 @@ class TestNewStore(util.CliTester):
     def test_add_pdb(self):
         self.run_add_command(["--product-name", "dummyprod"],
                              ["dummyprog.pdb"])
-        self.assertSymstoreDir("new_store.zip")
+
+    def test_add_compressed_pdb(self):
+        self.run_add_command(["--compress", "--product-name", "dummyprod"],
+                             ["dummyprog.pdb"])
+
+        self.assertSymstoreDir("new_store_compressed.zip")
 
 
 class TestExistingStore(util.CliTester):
