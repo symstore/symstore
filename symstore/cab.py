@@ -1,9 +1,17 @@
 from os import path
-from gi.repository import GCab
-from gi.repository import Gio
+
+# this flag is false on systems that don't provide gcab library
+compression_supported = True
+
+try:
+    from gi.repository import GCab
+    from gi.repository import Gio
+except ImportError as e:
+    compression_supported = False
 
 
 def compress(src_path, dest_path):
+    assert compression_supported
     cab_file = GCab.File.new_with_file(path.basename(src_path),
                                        Gio.File.new_for_path(src_path))
 

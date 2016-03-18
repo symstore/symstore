@@ -4,9 +4,11 @@ import shutil
 from os import path
 
 import symstore
+from symstore import cab
 from tests.cli import util
 
 
+@unittest.skipIf(not cab.compression_supported, util.NO_COMP_SKIP)
 class TestOpenCompressedEntry(unittest.TestCase):
     """
     test trying to open an compressed transaction entry's data

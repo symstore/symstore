@@ -45,7 +45,7 @@ Python module
 -------------
 
 To publish symbols programmatically use the ``symstore`` module.
-See ``symstore/bin/symstore`` for an example on how to use the API.
+See ``symstore/command_line.py`` for an example on how to use the API.
 
 Change Log
 ==========

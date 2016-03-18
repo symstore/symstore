@@ -1,6 +1,9 @@
+import unittest
 import tempfile
 import shutil
 from os import path
+
+from symstore import cab
 from tests.cli import util
 
 
@@ -24,6 +27,7 @@ class TestNewStore(util.CliTester):
         self.run_add_command(["--product-name", "dummyprod"],
                              ["dummyprog.pdb"])
 
+    @unittest.skipIf(not cab.compression_supported, util.NO_COMP_SKIP)
     def test_add_compressed_pdb(self):
         self.run_add_command(["--compress", "--product-name", "dummyprod"],
                              ["dummyprog.pdb"])

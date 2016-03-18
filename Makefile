@@ -1,7 +1,7 @@
 all: check flake8
 
 flake8:
-	flake8 . test symstore/bin/symstore
+	flake8 . test
 
 check:
 	./test
@@ -18,4 +18,4 @@ pkgs:
 	./setup.py bdist_wheel --universal
 
 loc:
-	@wc $(shell find . -name "*.py") symstore/bin/symstore
+	@wc $(shell find . -name "*.py")

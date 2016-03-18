@@ -21,7 +21,9 @@ setuptools.setup(
     keywords="development symstore pdb",
     packages=["symstore"],
     package_data={"symstore": ["VERSION"]},
-    scripts=["symstore/bin/symstore"],
+    entry_points={
+        "console_scripts": ["symstore=symstore.command_line:main"],
+    },
     extras_require={
         "develop":
             [

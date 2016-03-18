@@ -17,5 +17,5 @@ class TestSetup(unittest.TestCase):
                                            keywords=mock.ANY,
                                            packages=mock.ANY,
                                            package_data=mock.ANY,
-                                           scripts=mock.ANY,
+                                           entry_points=mock.ANY,
                                            extras_require=mock.ANY)
