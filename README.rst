@@ -47,6 +47,22 @@ Python module
 To publish symbols programmatically use the ``symstore`` module.
 See ``symstore/command_line.py`` for an example on how to use the API.
 
+Compression
+-----------
+
+The symstore package supports compressing the data files when publishing them.
+This can lead to significant reduction of data that needs to be transferred while accessing symbols.
+
+The compression mode is activated with ``--compress`` or ``-z`` flag to ``symstore`` command line utility.
+
+Symstore uses the ``gcab`` library and it's python binding to compress data.
+The required packages must be available on the system for the compression mode to work.
+In case symstore is not able to locate gcab packages while compression mode is requested, following error message will be displayed:
+
+.. code:: sh
+
+    gcab module not available, compression not supported
+
 Change Log
 ==========
 
