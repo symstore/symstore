@@ -66,6 +66,11 @@ In case symstore is not able to locate gcab packages while compression mode is r
 Change Log
 ==========
 
+0.2.0 (22 March 2016)
+---------------------
+
+* added compression support
+
 0.1.1 (10 February 2016)
 ------------------------
 
