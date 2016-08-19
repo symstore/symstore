@@ -65,8 +65,6 @@ class Root:
 
         :return: root bytes as an bytes array
         """
-        assert length < self.page_size, \
-            "multi-page reads not supported"
 
         start_page = start // self.page_size
         start_byte = start % self.page_size
@@ -74,11 +72,18 @@ class Root:
         end = start + length - 1
         end_page = end // self.page_size
 
-        assert start_page == end_page, \
-            "reads spanning two pages not implemented"
-
         self._seek(start_page, start_byte)
-        return self.fp.read(length)
+
+        partial_size = min(length, self.page_size - start_byte)
+        result = self.fp.read(partial_size)
+        length -= partial_size
+        while 0 < length:
+            start_page += 1
+            self._seek(start_page, 0)
+            partial_size = min(self.page_size, length)
+            result += self.fp.read(partial_size)
+            length -= partial_size
+        return result
 
     def num_streams(self):
         """
@@ -168,11 +173,18 @@ class PDBFile:
 
             # load the PDB stream page
             pdb_stream_pages = root.stream_pages(1)
-            f.seek(pdb_stream_pages[0]*page_size)
 
-            # load age and GUID from PDB stream
+            # load GUID from PDB stream
+            f.seek(pdb_stream_pages[0]*page_size)
             _, _, age, guid_d1, guid_d2, guid_d3, guid_d4 = \
                 struct.unpack("<IIIIHH8s", f.read(4*4 + 2 * 2 + 8))
+
+            # load proper age from the DBI information (PDB information age changes when using PDBSTR)
+            # vc140.pdb however, does not have this stream, we'll use the regular age for that one
+            dbi_stream_pages = root.stream_pages(3)
+            if 0 < len(dbi_stream_pages):
+                f.seek(dbi_stream_pages[0]*page_size)
+                _, _, age = struct.unpack("<III", f.read(3*4))
 
             # store GUID and age for user friendly retrieval
             self.guid = GUID(guid_d1, guid_d2, guid_d3, guid_d4)

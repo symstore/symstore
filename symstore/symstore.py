@@ -35,7 +35,7 @@ EXT_TYPES = dict(pdb=PDB_IMAGE,
 
 def _pdb_hash(filename):
     pdbfile = pdb.PDBFile(filename)
-    return "%s%s" % (pdbfile.guid, pdbfile.age)
+    return "%s%x" % (pdbfile.guid, pdbfile.age)
 
 
 def _pe_hash(file):
