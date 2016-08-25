@@ -69,9 +69,6 @@ class Root:
         start_page = start // self.page_size
         start_byte = start % self.page_size
 
-        end = start + length - 1
-        end_page = end // self.page_size
-
         self._seek(start_page, start_byte)
 
         partial_size = min(length, self.page_size - start_byte)
