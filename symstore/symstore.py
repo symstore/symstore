@@ -301,11 +301,26 @@ class History:
         return self._get_transactions()[item]
 
     def add(self, transaction):
-        with self._history_file("a") as hfile:
-            if hfile.tell() != 0:
+        def prefix_with_newline(f):
+            """
+            figure out if we need to prefix the new transaction line
+            with new line character
+            """
+            if f.seek(0, os.SEEK_END) == 0:
+                # end of file is byte 0, this is an empty file,
+                # no need for prefixing with with new line
+                return False
+
+            f.seek(-1, os.SEEK_END)
+            return f.read() != b'\n'
+
+        with self._history_file("ab+") as hfile:
+            if prefix_with_newline(hfile):
                 # add line break if appending to existing non-empty file
-                hfile.write("\n")
-            hfile.write("%s" % transaction)
+                hfile.write(b"\n")
+
+            new_line = "%s" % transaction
+            hfile.write(new_line.encode("utf-8"))
 
         # TODO handle I/O errors
 
