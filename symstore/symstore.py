@@ -306,7 +306,8 @@ class History:
             figure out if we need to prefix the new transaction line
             with new line character
             """
-            if f.seek(0, os.SEEK_END) == 0:
+            f.seek(0, os.SEEK_END)
+            if f.tell() == 0:  # use tell() for python 2 compatibility
                 # end of file is byte 0, this is an empty file,
                 # no need for prefixing with with new line
                 return False
