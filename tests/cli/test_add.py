@@ -25,7 +25,9 @@ class TestNewStore(util.CliTester):
 
     def test_add_pdb(self):
         self.run_add_command(["--product-name", "dummyprod"],
-                             ["dummyprog.pdb"])
+                             ["bigage.pdb", "dummyprog.pdb"])
+
+        self.assertSymstoreDir("new_store.zip")
 
     @unittest.skipIf(not cab.compression_supported, util.NO_COMP_SKIP)
     def test_add_compressed_pdb(self):
@@ -50,5 +52,5 @@ class TestPublishPE(util.CliTester):
     def test_add_pdb(self):
         self.run_add_command(["--product-name", "peprods",
                               "--product-version", "1.0.1"],
-                             ["dummyprog.exe", "dummylib.dll"])
+                             ["dummylib.dll", "dummyprog.exe"])
         self.assertSymstoreDir("pe_store.zip")
