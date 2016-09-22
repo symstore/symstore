@@ -173,17 +173,20 @@ class PDBFile:
 
             # load GUID from PDB stream
             f.seek(pdb_stream_pages[0]*page_size)
-            _, _, age, guid_d1, guid_d2, guid_d3, guid_d4 = \
+            _, _, _, guid_d1, guid_d2, guid_d3, guid_d4 = \
                 struct.unpack("<IIIIHH8s", f.read(4*4 + 2 * 2 + 8))
 
-            # load proper age from the DBI information
+            # load age from the DBI information
             # (PDB information age changes when using PDBSTR)
-            # vc140.pdb however, does not have this stream,
-            # we'll use the regular age for that one
             dbi_stream_pages = root.stream_pages(3)
             if 0 < len(dbi_stream_pages):
                 f.seek(dbi_stream_pages[0]*page_size)
                 _, _, age = struct.unpack("<III", f.read(3*4))
+            else:
+                # vc140.pdb however, does not have this stream,
+                # so it does not have an age that can be used
+                # in the hash string
+                age = None
 
             # store GUID and age for user friendly retrieval
             self.guid = GUID(guid_d1, guid_d2, guid_d3, guid_d4)

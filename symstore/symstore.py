@@ -35,7 +35,17 @@ EXT_TYPES = dict(pdb=PDB_IMAGE,
 
 def _pdb_hash(filename):
     pdbfile = pdb.PDBFile(filename)
-    return "%s%x" % (pdbfile.guid, pdbfile.age)
+
+    # figure out age string to be used in the hash string
+    if pdbfile.age is None:
+        # some pdb files does not have age,
+        # accoring to symstore.exe we should just
+        # skip adding the age to the hash string
+        age_str = ""
+    else:
+        age_str = "%x" % pdbfile.age
+
+    return "%s%s" % (pdbfile.guid, age_str)
 
 
 def _pe_hash(file):

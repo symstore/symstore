@@ -45,6 +45,15 @@ class TestExistingStore(util.CliTester):
                              ["dummylib.pdb"])
         self.assertSymstoreDir("existing_store.zip")
 
+    def test_special_pdb(self):
+        # test adding two pdbs with following properties:
+        #
+        #  mono.pdb - root stream spans multiple pages
+        #  vc140.pdb - no DBI stream
+        self.run_add_command(["--product-name", "specpdbs"],
+                             ["mono.pdb", "vc140.pdb"])
+        self.assertSymstoreDir("special_pdbs.zip")
+
 
 class TestPublishPE(util.CliTester):
     initial_dir_zip = "existing_store.zip"
