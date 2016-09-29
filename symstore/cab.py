@@ -4,6 +4,8 @@ from os import path
 compression_supported = True
 
 try:
+    import gi
+    gi.require_version('GCab', '1.0')
     from gi.repository import GCab
     from gi.repository import Gio
 except ImportError as e:
