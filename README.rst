@@ -66,6 +66,14 @@ In case symstore is not able to locate gcab packages while compression mode is r
 Change Log
 ==========
 
+0.2.1 (29 September 2016)
+-------------------------
+
+* generate correct signature for PDBs with age larger then 10
+* support publishing PDBs with multi-page root stream (larger files)
+* fetch PDB age from DBI stream
+* support publishing PDBs without DBI stream
+
 0.2.0 (22 March 2016)
 ---------------------
 
