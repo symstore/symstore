@@ -77,3 +77,33 @@ Stores the report in ``htmlcov`` directory.
 
 The default target.
 Will run flake8 checks and integrations tests.
+
+Making a Release to PyPi
+========================
+
+* create ~/.pyirc
+
+.. code:: ini
+
+    [distutils]
+    index-servers =
+      pypi
+      pypitest
+
+    [pypi]
+    repository=https://pypi.python.org/pypi
+    username=user
+
+    [pypitest]
+    repository=https://testpypi.python.org/pypi
+    username=user
+
+* pip install twine
+
+* make pkgs
+
+* twine upload -r pypitest dist/*
+
+* check https://testpypi.python.org/pypi/symstore
+
+* twine upload -r pypi dist/*
