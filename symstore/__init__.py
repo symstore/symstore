@@ -7,7 +7,16 @@ from symstore.symstore import Transaction
 from symstore.symstore import TransactionEntry
 from symstore.version import VERSION
 from symstore.errs import FileFormatError
+from symstore.errs import UnknownFileExtension
 
 
-__all__ = ["Store", "Transactions", "History", "Transaction",
-           "TransactionEntry", "FileFormatError", "VERSION"]
+__all__ = [
+    "Store",
+    "Transactions",
+    "History",
+    "Transaction",
+    "TransactionEntry",
+    "FileFormatError",
+    "UnknownFileExtension",
+    "VERSION"
+]

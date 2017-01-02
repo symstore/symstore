@@ -8,6 +8,7 @@ from os import path
 from symstore import pe
 from symstore import pdb
 from symstore import cab
+from symstore import errs
 from datetime import datetime
 
 TRANSACTION_LINE_RE = re.compile(
@@ -56,7 +57,10 @@ def _pe_hash(file):
 
 def _image_type(file):
     file_ext = path.splitext(file)[1][1:].lower()
-    # TODO handle cases of unknown file extensions
+
+    if file_ext not in EXT_TYPES:
+        raise errs.UnknownFileExtension(file_ext)
+
     return EXT_TYPES[file_ext]
 
 
@@ -177,6 +181,7 @@ class Transaction:
     def add_file(self, file, compress=False):
         """
         :raises pe.PEFormatError: on errors parsing PE (.exe/.dll) files
+        :raises UnknownFileExtension: if file extension is not .pdb/.exe/.dll
         """
         entry = TransactionEntry(self._symstore,
                                  path.basename(file),
