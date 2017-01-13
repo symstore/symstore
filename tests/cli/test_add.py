@@ -45,6 +45,12 @@ class TestExistingStore(util.CliTester):
                              ["dummylib.pdb"])
         self.assertSymstoreDir("existing_store.zip")
 
+    def test_republish(self):
+        self.run_add_command(["--product-name", "dummyprod"],
+                             ["dummyprog.pdb"])
+
+        self.assertSymstoreDir("republished.zip")
+
     def test_special_pdb(self):
         # test adding two pdbs with following properties:
         #
@@ -53,6 +59,17 @@ class TestExistingStore(util.CliTester):
         self.run_add_command(["--product-name", "specpdbs"],
                              ["mono.pdb", "vc140.pdb"])
         self.assertSymstoreDir("special_pdbs.zip")
+
+
+class TestRepublishCompressed(util.CliTester):
+    initial_dir_zip = "new_store_compressed.zip"
+
+    @unittest.skipIf(not cab.compression_supported, util.NO_COMP_SKIP)
+    def test_republish(self):
+        self.run_add_command(["--compress", "--product-name", "dummyprod"],
+                             ["dummyprog.pdb"])
+
+        self.assertSymstoreDir("republished_compressed.zip")
 
 
 class TestPublishPE(util.CliTester):

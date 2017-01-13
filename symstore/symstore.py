@@ -119,7 +119,9 @@ class TransactionEntry:
         """
         dest_dir = self._dest_dir()
 
-        os.makedirs(dest_dir)
+        if not path.isdir(dest_dir):
+            os.makedirs(dest_dir)
+
         if self.compressed:
             cab.compress(self.source_file,
                          path.join(dest_dir, self.file_name[:-1]+"_"))
