@@ -72,6 +72,13 @@ In case symstore is not able to locate python-gi and gir packages while compress
 Change Log
 ==========
 
+0.2.2 (16 January 2017)
+-----------------------
+
+* support republishing same file in a new transaction
+* print nice error message on unexpected file extensions
+* more details in the docs on how to setup gcab to enable compression
+
 0.2.1 (29 September 2016)
 -------------------------
 
