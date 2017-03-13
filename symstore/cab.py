@@ -24,4 +24,7 @@ def compress(src_path, dest_path):
     cab.add_folder(cab_folder)
 
     out_file = Gio.File.new_for_path(dest_path)
-    cab.write_simple(out_file.create(Gio.FileCreateFlags.NONE))
+    cab.write_simple(out_file.replace(None,
+                                      False,
+                                      Gio.FileCreateFlags.REPLACE_DESTINATION,
+                                      None))
