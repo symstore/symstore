@@ -60,6 +60,14 @@ class TestExistingStore(util.CliTester):
                              ["mono.pdb", "vc140.pdb"])
         self.assertSymstoreDir("special_pdbs.zip")
 
+    def test_longroot(self):
+        # test adding a pdb file with long root stream,
+        # a root stream which need more then one page
+        # to store it's indexes
+        self.run_add_command(["--product-name", "longroot"],
+                             ["longroot.pdb"])
+        self.assertSymstoreDir("longroot_store.zip")
+
 
 class TestRepublishCompressed(util.CliTester):
     initial_dir_zip = "new_store_compressed.zip"

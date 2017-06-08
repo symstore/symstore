@@ -7,7 +7,6 @@ check:
 	./test
 
 cov:
-	coverage combine
 	coverage erase
 	./test --coverage
 	coverage combine

@@ -30,21 +30,33 @@ class Root:
     methods to read raw chunks of the root stream, as well as accessing
     data about streams containing streams.
     """
-    def __init__(self, fp, page_size, size, ptr):
+    def __init__(self, fp, page_size, size):
         self.fp = fp
         self.page_size = page_size
         self.size = size
-        self.ptr = ptr
 
     def _pages(self):
         """
         get page numbers used by the root stream
         """
-        self.fp.seek(self.ptr * self.page_size)
         num_pages = pages(self.size, self.page_size)
-        assert num_pages * 4 < self.page_size, "long root stream not supported"
-        return struct.unpack("<%sI" % num_pages,
-                             self.fp.read(4*num_pages))
+
+        # root stream indexes starts 5 int pointers after the signature
+        self.fp.seek(len(SIGNATURE) + 4*5)
+        num_root_index_pages = pages(num_pages * 4, self.page_size)
+
+        root_index_pages = struct.unpack(
+            "<%sI" % num_root_index_pages,
+            self.fp.read(4*num_root_index_pages))
+
+        # read in the root page list
+        root_page_data = b""
+        for root_index in root_index_pages:
+            self.fp.seek(root_index * self.page_size)
+            root_page_data += self.fp.read(self.page_size)
+
+        page_list_fmt = "<" + ("%dI" % num_pages)
+        return struct.unpack(page_list_fmt, root_page_data[:num_pages*4])
 
     def _seek(self, page, byte):
         """
@@ -162,11 +174,11 @@ class PDBFile:
                 raise PDBFormatError("Invalid signature")
 
             # load page size and root stream definition
-            page_size, _, _, root_dir_size, _, root_ptr = \
-                struct.unpack("<IIIIII", f.read(4*6))
+            page_size, _, _, root_dir_size, _ = \
+                struct.unpack("<IIIII", f.read(4*5))
 
             # Create Root stream parser
-            root = Root(f, page_size, root_dir_size, root_ptr)
+            root = Root(f, page_size, root_dir_size)
 
             # load the PDB stream page
             pdb_stream_pages = root.stream_pages(1)
