@@ -34,8 +34,9 @@ class Root:
         self.fp = fp
         self.page_size = page_size
         self.size = size
+        self._pages_idx = None
 
-    def _pages(self):
+    def _load_pages(self):
         """
         get page numbers used by the root stream
         """
@@ -57,6 +58,12 @@ class Root:
 
         page_list_fmt = "<" + ("%dI" % num_pages)
         return struct.unpack(page_list_fmt, root_page_data[:num_pages*4])
+
+    def _pages(self):
+        if self._pages_idx is None:
+            self._pages_idx = self._load_pages()
+
+        return self._pages_idx
 
     def _seek(self, page, byte):
         """
