@@ -18,6 +18,6 @@ class TestRoot(unittest.TestCase):
         # mock that there is NUM_STREAMS available in the PDB file
         num_streams.return_value = NUM_STREAMS
 
-        root = pdb.Root(None, None, None, None)
+        root = pdb.Root(None, None, None)
         self.assertRaisesRegexp(IndexError, "stream index to large",
                                 root.stream_size, NUM_STREAMS+2)

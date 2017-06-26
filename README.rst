@@ -72,6 +72,12 @@ In case symstore is not able to locate python-gi and gir packages while compress
 Change Log
 ==========
 
+0.2.3 (24 June 2017)
+--------------------
+
+* support publishing PDBs with longer root stream (even larger files)
+* officially support python 3.6
+
 0.2.2 (16 January 2017)
 -----------------------
 
