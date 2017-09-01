@@ -5,6 +5,8 @@ from __future__ import absolute_import
 import sys
 import argparse
 import symstore
+import re
+import os
 
 
 class CompressionNotSupported(Exception):
@@ -15,11 +17,18 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description="publish windows debugging files")
 
-    parser.add_argument("store_path", metavar="STORE_PATH",
+    parser.add_argument("-s", "--store_path",
+                        dest="store_path",
+                        metavar="STORE_PATH",
                         type=str,
                         help="root directory of the symbol store")
-    parser.add_argument("files", metavar="FILE", type=str, nargs="+",
-                        help="PDB or PE file(s) to publish")
+
+    parser.add_argument("-t", "--target_files",
+                        dest="target_files",
+                        metavar="FILE(S)\FOLDER",
+                        type=str, nargs="+",
+                        help="PDB or PE file(s) to publish"
+                        " or directory with files.")
 
     parser.add_argument("-z", "--compress",
                         action="store_true",
@@ -63,6 +72,14 @@ def check_compression_support(compress_flag):
         raise CompressionNotSupported()
 
 
+def parse_directory(target_path, *patterns):
+    for dir_name, _, files in os.walk(target_path):
+        for f in files:
+            for pattern in patterns:
+                if re.match(pattern, f):
+                    yield os.path.join(dir_name, f)
+
+
 def main():
 
     args = parse_args()
@@ -76,8 +93,16 @@ def main():
         # create new add transaction, add all specified files
         transaction = sym_store.new_transaction(args.product_name,
                                                 args.product_version)
-        for file in args.files:
-            transaction.add_file(file, args.compress)
+
+        for target_item in args.target_files:
+            if os.path.isdir(target_item):
+                for item_target_file in parse_directory(target_item,
+                                                        ".*pdb$|.*exe$"):
+                    transaction.add_file(item_target_file, args.compress)
+            elif os.path.isfile(target_item):
+                transaction.add_file(target_item, args.compress)
+            else:
+                transaction.add_file(target_item, args.compress)
 
         # commit the transaction to the store
         sym_store.commit(transaction)
@@ -87,3 +112,6 @@ def main():
         err_exit("%s: invalid %s file: %s" % (file, e.format_name, e))
     except CompressionNotSupported:
         err_exit("gcab module not available, compression not supported")
+
+if __name__ == '__main__':
+    main()
