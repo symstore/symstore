@@ -7,7 +7,11 @@ import argparse
 import symstore
 import re
 import os
+import symstore.logger
+import logging
 
+
+log = symstore.logger.get_logger(__name__)
 
 class CompressionNotSupported(Exception):
     pass
@@ -30,6 +34,12 @@ def parse_args():
                         help="PDB or PE file(s) to publish"
                         " or directory with files.")
 
+    parser.add_argument("--silent", action="store_true", dest="silent")
+
+    parser.add_argument("--save_log",
+                        default=False,
+                        dest="save_log")
+
     parser.add_argument("-z", "--compress",
                         action="store_true",
                         help="publish compressed files")
@@ -44,12 +54,12 @@ def parse_args():
                         action="version",
                         version="symstore %s" % symstore.VERSION,
                         help="show program's version number and exit")
-
     return parser.parse_args()
 
 
 def err_exit(error_msg):
     sys.stderr.write("%s\n" % error_msg)
+    log.debug(error_msg)
     sys.exit(1)
 
 
@@ -64,11 +74,12 @@ def unknown_ext_err(file, file_extension):
 
 def check_compression_support(compress_flag):
     if not compress_flag:
-        # compression not request, no need to check
+        log.debug("Compression not request, no need to check.")
         return
 
     from symstore import cab
     if not cab.compression_supported:
+        log.debug("Compression not supported.")
         raise CompressionNotSupported()
 
 
@@ -80,11 +91,38 @@ def parse_directory(target_path, *patterns):
                     yield os.path.join(dir_name, f)
 
 
+def update_logging(log_object, log_level=logging.DEBUG, log_file=None):
+    log_format = "%(asctime)s - %(message)s"
+    log_object.setLevel(log_level)
+
+    # added stdout handler
+    cli_format = logging.Formatter(log_format)
+    cli_ho = logging.StreamHandler(sys.stdout)
+    cli_ho.setFormatter(cli_format)
+    log_object.addHandler(cli_ho)
+
+    if log_file:
+        f_format = logging.Formatter(log_format)
+        file_h = logging.FileHandler(log_file, mode="w")
+        file_h.setFormatter(f_format)
+        log_object.addHandler(file_h)
+
+
 def main():
 
     args = parse_args()
-
     sym_store = symstore.Store(args.store_path)
+    pp_args = "\n ".join([": ".join([k, str(getattr(args, k)) \
+                                     if not isinstance(getattr(args, k), (list))\
+                                     else ", ".join(getattr(args, k))]) \
+                          for k in vars(args)])
+
+    log_level = logging.INFO if args.silent else logging.DEBUG
+    log_file = args.save_log if args.save_log else None
+
+    update_logging(log, log_level=log_level, log_file=log_file)
+    log.debug("Started symstore ops via CLI.")
+    log.debug("Parameters: %s " %pp_args)
 
     try:
         # error-out if no compression
@@ -113,5 +151,3 @@ def main():
     except CompressionNotSupported:
         err_exit("gcab module not available, compression not supported")
 
-if __name__ == '__main__':
-    main()

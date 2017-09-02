@@ -10,6 +10,9 @@ from symstore import pdb
 from symstore import cab
 from symstore import errs
 from datetime import datetime
+import logging
+
+log = logging.getLogger(__name__)
 
 TRANSACTION_LINE_RE = re.compile(
     r"(\d+),"
@@ -120,12 +123,14 @@ class TransactionEntry:
         dest_dir = self._dest_dir()
 
         if not path.isdir(dest_dir):
+            log.debug("Created directories: %s " % dest_dir)
             os.makedirs(dest_dir)
 
         if self.compressed:
             cab.compress(self.source_file,
                          path.join(dest_dir, self.file_name[:-1]+"_"))
         else:
+            log.debug("Copy %s %s" % (self.source_file, dest_dir))
             shutil.copy(self.source_file, dest_dir)
             # TODO handle I/O errors
 
@@ -185,13 +190,14 @@ class Transaction:
         :raises pe.PEFormatError: on errors parsing PE (.exe/.dll) files
         :raises UnknownFileExtension: if file extension is not .pdb/.exe/.dll
         """
+        log.debug("Add file %s" % file)
         entry = TransactionEntry(self._symstore,
                                  path.basename(file),
                                  _file_hash(file),
                                  file,
                                  compress)
         # TODO handle I/O errors from _file_hash()
-
+        log.debug("Will be added entry: %s " % entry)
         self.entries.append(entry)
 
     @property
