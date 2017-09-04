@@ -53,6 +53,7 @@ def _pdb_hash(filename):
 
 
 def _pe_hash(file):
+
     pefile = pe.PEFile(file)
 
     return "%X%X" % (pefile.TimeDateStamp, pefile.SizeOfImage)
@@ -130,9 +131,15 @@ class TransactionEntry:
             cab.compress(self.source_file,
                          path.join(dest_dir, self.file_name[:-1]+"_"))
         else:
-            log.debug("Copy %s %s" % (self.source_file, dest_dir))
-            shutil.copy(self.source_file, dest_dir)
-            # TODO handle I/O errors
+            try:
+                log.debug("Copy %s %s" % (self.source_file, dest_dir))
+                shutil.copy(self.source_file, dest_dir)
+            except IOError as e:
+                log.debug("Can\'t copy %s to %s. Error: %s"
+                          % (self.source_file, dest_dir, e))
+            except OSError as e:
+                log.debug("Can\'t copy %s to %s. Erro: %s"
+                          % (self.source_file, dest_dir, e))
 
     def __str__(self):
         return """"%s\%s","%s""""" % \
@@ -160,45 +167,59 @@ class Transaction:
         return self.id is not None
 
     def _entries_file(self, mode="r"):
-        return open(path.join(self._symstore._admin_dir, self.id),
-                    mode=mode)
+        try:
+            path_efile = path.join(self._symstore._admin_dir, self.id)
+            efile = open(path_efile, mode=mode)
+            return efile
+        except IOError as e:
+            log.debug("File %s is unreachable. Error %s" % (path_efile, e))
+        except OSError as e:
+            log.debug("File %s is unreachable. Error %s" % (path_efile, e))
 
     def _load_entries(self):
         if not self._commited():
             return []
 
         entries = []
-        with self._entries_file() as efile:
-            for line in efile.readlines():
-                entry, source_file = [
-                    s.strip("\"") for s in line.strip().split(",")]
+        try:
+            with self._entries_file() as efile:
+                for line in efile.readlines():
+                    entry, source_file = [
+                        s.strip("\"") for s in line.strip().split(",")]
 
-                file_name, file_hash = entry.split("\\")
+                    file_name, file_hash = entry.split("\\")
 
-                transaction_entry = self.transaction_entry_class.load(
-                    self._symstore, file_name, file_hash, source_file)
-
-                entries.append(transaction_entry)
-
-        # TODO catch IOERrror
-        # TODO catch parse errors
-
-        return entries
+                    transaction_entry = self.transaction_entry_class.load(
+                        self._symstore, file_name, file_hash, source_file)
+                    entries.append(transaction_entry)
+            return entries
+        except IOError as e:
+            log.debug(e)
+        except OSError as e:
+            log.debug(e)
 
     def add_file(self, file, compress=False):
         """
         :raises pe.PEFormatError: on errors parsing PE (.exe/.dll) files
         :raises UnknownFileExtension: if file extension is not .pdb/.exe/.dll
         """
-        log.debug("Add file %s" % file)
-        entry = TransactionEntry(self._symstore,
-                                 path.basename(file),
-                                 _file_hash(file),
-                                 file,
-                                 compress)
-        # TODO handle I/O errors from _file_hash()
-        log.debug("Will be added entry: %s " % entry)
-        self.entries.append(entry)
+        try:
+            fh = _file_hash(file)
+        except IOError as e:
+            log.debug("%s" % e)
+        except OSError as e:
+            log.debug("%s" % e)
+
+        if fh:
+            entry = TransactionEntry(self._symstore,
+                                     path.basename(file),
+                                     fh,
+                                     file,
+                                     compress)
+            log.debug("Will be added entry: %s " % entry)
+            self.entries.append(entry)
+        else:
+            log.debug("File %s hash is empty" % file)
 
     @property
     def entries(self):
@@ -212,16 +233,18 @@ class Transaction:
 
         self.timestamp = now
         self.id = id
-
-        # publish all entries files to the store
-        for entry in self.entries:
-            entry.publish()
-
-        # write new transaction file
-        with self._entries_file("a") as efile:
+        if self.entries:
+            # publish all entries files to the store
             for entry in self.entries:
-                efile.write("%s\n" % entry)
-        # TODO handle I/O errors while opening/writing efile
+                entry.publish()
+
+            # write new transaction file
+            with self._entries_file("a") as efile:
+                for entry in self.entries:
+                    try:
+                        efile.write("%s\n" % entry)
+                    except IOError as e:
+                        log.debug("Error %s" % e)
 
     def __str__(self):
         date_stamp = self.timestamp.strftime("%m/%d/%Y")
