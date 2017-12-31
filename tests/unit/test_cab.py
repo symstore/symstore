@@ -33,12 +33,37 @@ def no_gi_import(name, *args):
     return orig_import(name, *args)
 
 
+def no_gcab_namespace(name, *args):
+    """
+    Mock gi.require_version() to raise an ValueError to
+    simulate that GCab bindings are not available.
+
+    We mock importing the whole 'gi', so that this test
+    can be run even when the 'gi' package is not available.
+    """
+    if name.startswith("gi"):
+        m = mock.Mock()
+        m.require_version.side_effect = ValueError
+
+        return m
+    return orig_import(name, *args)
+
+
 class TestNoGcab(unittest.TestCase):
-    """
-    test the case when we can't import gi.repository.Gcab
-    """
     @mock.patch(IMPORT_MODULE, side_effect=no_gi_import)
     def test_gi_import_error(self, _):
+        """
+        test the case when we can't import gi
+        """
+        import symstore.cab
+        _reload(symstore.cab)
+        self.assertFalse(symstore.cab.compression_supported)
+
+    @mock.patch(IMPORT_MODULE, side_effect=no_gcab_namespace)
+    def test_no_gcab_namespace(self, _):
+        """
+        test the case whan gi is available, but Gcab is not
+        """
         import symstore.cab
         _reload(symstore.cab)
         self.assertFalse(symstore.cab.compression_supported)
