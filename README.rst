@@ -72,6 +72,11 @@ In case symstore is not able to locate python-gi and gir packages while compress
 Change Log
 ==========
 
+0.2.4 (31 January 2018)
+-----------------------
+
+* improved error handling on missing GCab python binding
+
 0.2.3 (24 June 2017)
 --------------------
 
