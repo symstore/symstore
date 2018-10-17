@@ -330,7 +330,13 @@ class History:
                 return False
 
             f.seek(-1, os.SEEK_END)
-            return f.read() != b'\n'
+            ch = f.read(1)
+
+            # use seek() for python 2 compatibility otherwise
+            # later file writes will fail
+            f.seek(0, os.SEEK_END)
+
+            return ch != b'\n'
 
         with self._history_file("ab+") as hfile:
             if prefix_with_newline(hfile):
