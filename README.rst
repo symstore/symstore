@@ -2,7 +2,7 @@
 symstore
 ========
 
-A python module and command lite utility for publishing windows debugging symbols to symbols store.
+A python module and command line utility for publishing windows debugging symbols to symbols store.
 The symbols published in this format can be consumed by the common development tools for windows, such as Visual Studio and WinDbg.
 See `Using SymStore <https://msdn.microsoft.com/en-us/library/windows/desktop/ms681417%28v=vs.85%29.aspx>`_ for more information on windows symbols store.
 
