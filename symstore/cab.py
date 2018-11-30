@@ -8,9 +8,9 @@ try:
     gi.require_version('GCab', '1.0')
     from gi.repository import GCab
     from gi.repository import Gio
-except ValueError as e:
+except ValueError:
     compression_supported = False
-except ImportError as e:
+except ImportError:
     compression_supported = False
 
 
