@@ -5,6 +5,11 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+  - "3.7"
+
+# python 3.7 requires at least Ubuntu 16.04 (xenial)
+dist:
+  - xenial
 
 install:
   - pip install -e .[develop]
