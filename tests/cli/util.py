@@ -5,6 +5,7 @@ import time
 import shutil
 import zipfile
 import subprocess
+import platform
 from os import path
 from datetime import datetime
 from distutils import spawn
@@ -117,6 +118,17 @@ def run_script(symstore_path, files, options=[]):
     _, stderr = proc.communicate()
 
     return proc.returncode, stderr
+
+
+def line_end():
+    """
+    get the line end string,
+        e.g. \r\n on windows and \n otherwise
+    """
+    if platform.system() == "Windows":
+        # handle the special snowflake windows
+        return "\r\n"
+    return "\n"
 
 
 class CliTester(unittest.TestCase):

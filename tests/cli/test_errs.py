@@ -31,8 +31,8 @@ class TestUnknownExtension(unittest.TestCase):
     def assertErrorMsg(self, retcode, stderr, filename, msg):
         self.assertEqual(retcode, 1)
         self.assertRegexpMatches(stderr.decode(),
-                                 ".*%s: %s, can't figure out file format\n" %
-                                 (filename, msg),
+                                 ".*%s: %s, can't figure out file format%s" %
+                                 (filename, msg, util.line_end()),
                                  "unexpected error message")
 
     def test_no_extension(self):
