@@ -72,6 +72,12 @@ In case symstore is not able to locate python-gi and gir packages while compress
 Change Log
 ==========
 
+0.2.5 (16 december 2018)
+------------------------
+
+* officially support python 3.7
+* fixed write errors to history.txt on windows/python2.7
+
 0.2.4 (31 January 2018)
 -----------------------
 
