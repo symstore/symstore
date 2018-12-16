@@ -81,7 +81,7 @@ Will run flake8 checks and integrations tests.
 Making a Release to PyPi
 ========================
 
-* create ~/.pyirc
+* create ~/.pypirc
 
 .. code:: ini
 
@@ -91,11 +91,11 @@ Making a Release to PyPi
       pypitest
 
     [pypi]
-    repository=https://pypi.python.org/pypi
+    repository=https://upload.pypi.org/legacy/
     username=user
 
     [pypitest]
-    repository=https://testpypi.python.org/pypi
+    repository=https://test.pypi.org/legacy/
     username=user
 
 * pip install twine
