@@ -160,37 +160,37 @@ class CliTester(unittest.TestCase):
                          "expected %s got %s." % (expected, got))
 
     def _assert_transaction_entry(self, transaction_id, expected, got):
-            self.assertEqual(expected.file_name, got.file_name,
-                             "Unexpected file name entry for transaction %s: "
-                             "expected '%s', got '%s'" %
-                             (transaction_id,
-                              expected.file_name,
-                              got.file_name))
+        self.assertEqual(expected.file_name, got.file_name,
+                         "Unexpected file name entry for transaction %s: "
+                         "expected '%s', got '%s'" %
+                         (transaction_id,
+                          expected.file_name,
+                          got.file_name))
 
-            self.assertEqual(expected.file_hash, got.file_hash,
-                             "Unexpected file hash entry for transaction %s: "
-                             "expected '%s', got '%s'" %
-                             (transaction_id,
-                              expected.file_hash,
-                              got.file_hash))
+        self.assertEqual(expected.file_hash, got.file_hash,
+                         "Unexpected file hash entry for transaction %s: "
+                         "expected '%s', got '%s'" %
+                         (transaction_id,
+                          expected.file_hash,
+                          got.file_hash))
 
-            exp_src_file = _file_part(expected.source_file)
-            got_src_file = _file_part(got.source_file)
+        exp_src_file = _file_part(expected.source_file)
+        got_src_file = _file_part(got.source_file)
 
-            self.assertEqual(exp_src_file, got_src_file,
-                             "Unexpected source file for transaction: %s: "
-                             "expected '%s'. got '%s'" %
-                             (transaction_id, exp_src_file, got_src_file))
+        self.assertEqual(exp_src_file, got_src_file,
+                         "Unexpected source file for transaction: %s: "
+                         "expected '%s'. got '%s'" %
+                         (transaction_id, exp_src_file, got_src_file))
 
-            self.assertEquals(expected.compressed, got.compressed)
+        self.assertEquals(expected.compressed, got.compressed)
 
-            if not expected.compressed:
-                # as we don't support reading compressed entries data,
-                # check data only for uncompressed entries
-                self.assertEqual(expected.open().read(),
-                                 got.open().read(),
-                                 "Unexpected contents for %s/%s" %
-                                 (expected.file_name, expected.file_hash))
+        if not expected.compressed:
+            # as we don't support reading compressed entries data,
+            # check data only for uncompressed entries
+            self.assertEqual(expected.open().read(),
+                             got.open().read(),
+                             "Unexpected contents for %s/%s" %
+                             (expected.file_name, expected.file_hash))
 
     def _assert_transaction_metadata(self, expected, got, modify_timestamp):
         for attrname in ["id", "type", "ref", "product", "version", "comment"]:
