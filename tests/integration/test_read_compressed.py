@@ -39,4 +39,4 @@ class TestOpenCompressedEntry(unittest.TestCase):
         entry = transactions[0][1].entries[0]
         self.assertRaisesRegexp(NotImplementedError,
                                 "reading compressed data not supported",
-                                entry.open)
+                                entry.read)

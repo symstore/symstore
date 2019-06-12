@@ -45,13 +45,14 @@ class ZipTransactionEntry(symstore.TransactionEntry):
 
         return cls(symstore, file_name, file_hash, source_file, compressed)
 
-    def open(self):
+    def read(self):
         if self.compressed:
             raise NotImplementedError("reading compressed data not supported")
 
         name = ZipTransactionEntry._archive_name(self.file_name,
                                                  self.file_hash)
-        return self._symstore._zfile.open(name)
+        with self._symstore._zfile.open(name) as f:
+            return f.read()
 
 
 class ZipTransaction(symstore.Transaction):
@@ -187,8 +188,8 @@ class CliTester(unittest.TestCase):
         if not expected.compressed:
             # as we don't support reading compressed entries data,
             # check data only for uncompressed entries
-            self.assertEqual(expected.open().read(),
-                             got.open().read(),
+            self.assertEqual(expected.read(),
+                             got.read(),
                              "Unexpected contents for %s/%s" %
                              (expected.file_name, expected.file_hash))
 

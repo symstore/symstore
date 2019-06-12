@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 import setuptools
-from os import path
+import symstore
+from symstore import fileio
 
-VERSION = open(path.join("symstore", "VERSION")).read().strip()
 
 setuptools.setup(
     name="symstore",
-    version=VERSION,
+    version=symstore.VERSION,
     description="publish PDB and PE files to symbols store",
-    long_description=open("README.rst", "r").read(),
+    long_description=fileio.read_all("README.rst"),
     url="https://github.com/elmirjagudin/symstore",
     classifiers=[
         "Intended Audience :: Developers",

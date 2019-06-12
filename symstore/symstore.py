@@ -9,6 +9,7 @@ from symstore import pe
 from symstore import pdb
 from symstore import cab
 from symstore import errs
+from symstore import fileio
 from datetime import datetime
 
 TRANSACTION_LINE_RE = re.compile(
@@ -105,13 +106,12 @@ class TransactionEntry:
     def _dest_dir(self):
         return path.join(self._symstore._path, self.file_name, self.file_hash)
 
-    def open(self):
+    def read(self):
         if self.compressed:
             raise NotImplementedError("reading compressed data not supported")
 
         fpath = path.join(self._dest_dir(), self.file_name)
-
-        return open(fpath, "rb")
+        return fileio.read_all(fpath, "rb")
 
     def publish(self):
         """
@@ -400,7 +400,7 @@ class Store:
         if path.isfile(last_id_file):
             # TODO handle open and read errors
             # TODO handle parse errors
-            last_id = int(open(last_id_file, "r").read())
+            last_id = int(fileio.read_all(last_id_file))
 
         return "%.010d" % (last_id + 1)
 
@@ -412,7 +412,7 @@ class Store:
         pingme_path = self._pingme_file
 
         if not path.isfile(pingme_path):
-            open(pingme_path, "a")
+            open(pingme_path, "a").close()
 
         os.utime(pingme_path, (timestamp, timestamp))
 
