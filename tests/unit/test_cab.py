@@ -50,6 +50,14 @@ def no_gcab_namespace(name, *args):
 
 
 class TestNoGcab(unittest.TestCase):
+    def tearDown(self):
+        # make sure we reload 'cab' module after the test,
+        # so the true value of 'compression supported'
+        # flag is restored, otherwise it will be stuck
+        # in 'not supported' mode for subsequent tests
+        import symstore.cab
+        _reload(symstore.cab)
+
     @mock.patch(IMPORT_MODULE, side_effect=no_gi_import)
     def test_gi_import_error(self, _):
         """

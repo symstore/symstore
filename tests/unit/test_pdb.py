@@ -1,11 +1,11 @@
 import mock
-import unittest
 from symstore import pdb
+from tests import testcase
 
 NUM_STREAMS = 5
 
 
-class TestRoot(unittest.TestCase):
+class TestRoot(testcase.TestCase):
     """
     test some methods in pdb.Root class
     """
@@ -19,5 +19,5 @@ class TestRoot(unittest.TestCase):
         num_streams.return_value = NUM_STREAMS
 
         root = pdb.Root(None, None, None)
-        self.assertRaisesRegexp(IndexError, "stream index to large",
-                                root.stream_size, NUM_STREAMS+2)
+        self.assertRaisesRegex(IndexError, "stream index to large",
+                               root.stream_size, NUM_STREAMS+2)

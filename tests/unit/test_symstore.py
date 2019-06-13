@@ -36,7 +36,7 @@ class TestHistoryAdd(unittest.TestCase):
 
     def assertFileContents(self, file_path, content):
         with open(file_path, "r") as f:
-            self.assertEquals(f.read(), content)
+            self.assertEqual(f.read(), content)
 
     def test_new_file(self):
         """

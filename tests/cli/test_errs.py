@@ -1,15 +1,15 @@
-import unittest
 from tests.cli import util
+from tests import testcase
 
 SYMSTORE_PATH = "dummy"
 
 
-class TestInvalidPEFile(unittest.TestCase):
+class TestInvalidPEFile(testcase.TestCase):
     def assertInvalidPEMsg(self, retcode, msg, type, filename):
         self.assertEqual(retcode, 1)
-        self.assertRegexpMatches(msg.decode(),
-                                 ".*%s: invalid %s file:.*\n" %
-                                 (filename, type), "unexpected error message")
+        self.assertRegex(msg.decode(),
+                         ".*%s: invalid %s file:.*\n" %
+                         (filename, type), "unexpected error message")
 
     def test_empty_exe(self):
         """
@@ -27,13 +27,13 @@ class TestInvalidPEFile(unittest.TestCase):
         self.assertInvalidPEMsg(retcode, stderr, "PDB", "invalid.pdb")
 
 
-class TestUnknownExtension(unittest.TestCase):
+class TestUnknownExtension(testcase.TestCase):
     def assertErrorMsg(self, retcode, stderr, filename, msg):
         self.assertEqual(retcode, 1)
-        self.assertRegexpMatches(stderr.decode(),
-                                 ".*%s: %s, can't figure out file format%s" %
-                                 (filename, msg, util.line_end()),
-                                 "unexpected error message")
+        self.assertRegex(stderr.decode(),
+                         ".*%s: %s, can't figure out file format%s" %
+                         (filename, msg, util.line_end()),
+                         "unexpected error message")
 
     def test_no_extension(self):
         filename = "no_extension"

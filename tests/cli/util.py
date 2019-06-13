@@ -183,7 +183,7 @@ class CliTester(unittest.TestCase):
                          "expected '%s'. got '%s'" %
                          (transaction_id, exp_src_file, got_src_file))
 
-        self.assertEquals(expected.compressed, got.compressed)
+        self.assertEqual(expected.compressed, got.compressed)
 
         if not expected.compressed:
             # as we don't support reading compressed entries data,

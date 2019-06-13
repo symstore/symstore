@@ -6,10 +6,11 @@ from os import path
 import symstore
 from symstore import cab
 from tests.cli import util
+from tests import testcase
 
 
 @unittest.skipIf(not cab.compression_supported, util.NO_COMP_SKIP)
-class TestOpenCompressedEntry(unittest.TestCase):
+class TestOpenCompressedEntry(testcase.TestCase):
     """
     test trying to open an compressed transaction entry's data
     """
@@ -37,6 +38,6 @@ class TestOpenCompressedEntry(unittest.TestCase):
         """
         transactions = list(self.symstore.transactions.items())
         entry = transactions[0][1].entries[0]
-        self.assertRaisesRegexp(NotImplementedError,
-                                "reading compressed data not supported",
-                                entry.read)
+        self.assertRaisesRegex(NotImplementedError,
+                               "reading compressed data not supported",
+                               entry.read)
