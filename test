@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import warnings
 import unittest
 import argparse
 from contextlib import contextmanager
@@ -51,8 +52,41 @@ def coverage(enabled):
         yield None
 
 
-args = parse_args()
+#
+# raise exceptions on runtime warnings
+#
+# note that some warnings, e.g. ResourceWarning, are only
+# generated when the python process is exiting, and thus
+# will not be caught. this means that test will pass
+# even when we are getting some warnings.
+#
+# for now we'll rely on watching manually the generated test log
+# to spot some of the warnings
+#
+warnings.simplefilter("error")
 
+# ignore deprecation warnings originating in distutils code,
+# we can't really do anything about these warnings
+warnings.filterwarnings("ignore",
+                        category=DeprecationWarning,
+                        module="distutils")
+
+# ignore python 3.5 specific warnings, from third-party code
+# these filters can be removed if we drop python 3.5 support
+warnings.filterwarnings("ignore",
+                        category=PendingDeprecationWarning,
+                        module="distutils")
+
+# ignore python 3.4 specific warnings, from third-party code
+# these filters can be removed if we drop python 3.4 support
+warnings.filterwarnings("ignore",
+                        category=PendingDeprecationWarning,
+                        module="imp")
+warnings.filterwarnings("ignore",
+                        category=DeprecationWarning,
+                        module="setuptools.py33compat")
+
+args = parse_args()
 test_suites = get_testsuite(args.tests)
 
 with coverage(args.coverage):
