@@ -77,7 +77,13 @@ In case symstore is not able to locate python-gi and gir packages while compress
 Change Log
 ==========
 
-0.2.5 (16 december 2018)
+0.2.6 (29 August 2019)
+----------------------
+
+* don't leak open file handles during operation (issue #10)
+
+
+0.2.5 (16 December 2018)
 ------------------------
 
 * officially support python 3.7
