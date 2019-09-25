@@ -19,9 +19,13 @@ setuptools.setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
+    license="MIT",
     keywords="development symstore pdb",
     packages=["symstore"],
     package_data={"symstore": ["VERSION"]},
+    data_files=[
+        ("", ["LICENSE"])
+    ],
     entry_points={
         "console_scripts": ["symstore=symstore.command_line:main"],
     },

@@ -14,8 +14,10 @@ class TestSetup(unittest.TestCase):
                                            long_description=mock.ANY,
                                            url=mock.ANY,
                                            classifiers=mock.ANY,
+                                           license="MIT",
                                            keywords=mock.ANY,
                                            packages=mock.ANY,
                                            package_data=mock.ANY,
+                                           data_files=[("", ["LICENSE"])],
                                            entry_points=mock.ANY,
                                            extras_require=mock.ANY)
