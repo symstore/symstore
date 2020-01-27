@@ -11,7 +11,13 @@ Currently it is possible to publish PDB and PE (exe and dll) files to a local fi
 Installing
 ==========
 
-Install with pip utility by running:
+Symstore is available on pypi and conda package repositories.
+It can be installed with ``pip`` or ``conda`` utilities, see below.
+
+Pip
+---
+
+Install symstore with pip utility by running:
 
 .. code:: sh
 
@@ -32,6 +38,15 @@ and install it with pip:
 
     $ pip install symstore/
 
+Conda
+-----
+
+The symstore package is available on ``conda-forge`` channel.
+To install it, activate your conda environment and run:
+
+.. code:: sh
+
+    $ conda install --channel conda-forge symstore
 
 Using
 =====
