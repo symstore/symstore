@@ -76,6 +76,10 @@ def _file_hash(file):
     return _pe_hash(file)
 
 
+def _is_empty_dir(dir_path):
+    return len(os.listdir(dir_path)) == 0
+
+
 class TransactionEntry:
     def __init__(self, symstore, file_name, file_hash, source_file,
                  compressed=False):
@@ -155,9 +159,11 @@ class Transaction:
     def _commited(self):
         return self.id is not None
 
+    def _entries_file_path(self):
+        return path.join(self._symstore._admin_dir, self.id)
+
     def _entries_file(self, mode="r"):
-        return open(path.join(self._symstore._admin_dir, self.id),
-                    mode=mode)
+        return open(self._entries_file_path(), mode=mode)
 
     def _load_entries(self):
         if not self._commited():
@@ -219,6 +225,11 @@ class Transaction:
                 efile.write("%s\n" % entry)
         # TODO handle I/O errors while opening/writing efile
 
+    def mark_deleted(self):
+        src = self._entries_file_path()
+        dst = "%s.deleted" % src
+        os.rename(src, dst)
+
     def __str__(self):
         date_stamp = self.timestamp.strftime("%m/%d/%Y")
         time_stamp = self.timestamp.strftime("%H:%M:%S")
@@ -236,6 +247,34 @@ def parse_transaction_line(line):
 
     ts = datetime.strptime(timestamp, "%m/%d/%Y,%H:%M:%S")
     return id, type, ref,  ts, product, version, comment
+
+
+class FilesMap:
+    def __init__(self):
+        self._entries = {}
+
+    def add_entry(self, entry, transaction):
+        map_key = (entry.file_name, entry.file_hash)
+
+        if map_key not in self._entries:
+            self._entries[map_key] = []
+
+        self._entries[map_key].append(transaction.id)
+
+    def droped_entries(self, transaction):
+        """
+        figure out which files can be deleted
+        """
+        deleted_entries = []
+
+        for entry, trans_ids in self._entries.items():
+            if transaction.id not in trans_ids:
+                continue
+
+            if len(trans_ids) == 1:
+                deleted_entries.append(entry)
+
+        return deleted_entries
 
 
 class Transactions:
@@ -271,6 +310,18 @@ class Transactions:
             self._transactions = self._parse_server_file()
         return self._transactions
 
+    def find(self, transaction_id):
+        return self._get_transactions().get(transaction_id)
+
+    def get_files_map(self):
+        fmap = FilesMap()
+
+        for transaction in self._get_transactions().values():
+            for entry in transaction.entries:
+                fmap.add_entry(entry, transaction)
+
+        return fmap
+
     def items(self):
         return self._get_transactions().items()
 
@@ -278,6 +329,42 @@ class Transactions:
         with self._server_file("a") as sfile:
             sfile.write("%s\n" % transaction)
         # TODO handle I/O errors
+
+    def rewrite_server_file(self, transactions):
+        """
+        overwrite the server.txt with specified transactions
+
+            transactions - transactions to list in the server file
+        """
+        # make sure transactions list is sorted by transaction IDs
+        transactions.sort(key=lambda v: v.id)
+
+        with self._server_file("w") as sfile:
+            for transaction in transactions:
+                sfile.write("%s\n" % transaction)
+
+    def delete(self, transaction):
+        # figure out what files can be removed
+        files_map = self.get_files_map()
+        dropped = files_map.droped_entries(transaction)
+
+        # delete any dropped files
+        for file_name, file_hash in dropped:
+            dir_path = path.join(self._symstore._path, file_name, file_hash)
+            shutil.rmtree(dir_path)
+
+            # if parent directory becomes empty, remove it as well
+            parent_dir = path.dirname(dir_path)
+            if _is_empty_dir(parent_dir):
+                shutil.rmtree(parent_dir)
+
+        # create a list of transaction without the deleted transaction
+        new_transactions = [
+            v for v in self._transactions.values()
+            if v.id != transaction.id]
+
+        # 'delete' transaction listing from server file
+        self.rewrite_server_file(new_transactions)
 
 
 class History:
@@ -319,7 +406,7 @@ class History:
     def __getitem__(self, item):
         return self._get_transactions()[item]
 
-    def add(self, transaction):
+    def _write_line(self, new_line):
         def prefix_with_newline(f):
             """
             figure out if we need to prefix the new transaction line
@@ -345,10 +432,15 @@ class History:
                 # add line break if appending to existing non-empty file
                 hfile.write(b"\n")
 
-            new_line = "%s" % transaction
             hfile.write(new_line.encode("utf-8"))
 
         # TODO handle I/O errors
+
+    def add(self, transaction):
+        self._write_line("%s" % transaction)
+
+    def delete(self, transaction_id, next_transaction_id):
+        self._write_line("%s,del,%s" % (next_transaction_id, transaction_id))
 
 
 class Store:
@@ -421,6 +513,21 @@ class Store:
 
     def new_transaction(self, product, version, type="add"):
         return Transaction(self, type=type, product=product, version=version)
+
+    def delete_transaction(self, transaction_id):
+        # look up the transaction to delete
+        transaction = self.transactions.find(transaction_id)
+        if transaction is None:
+            raise errs.TransactionNotFound()
+
+        self.transactions.delete(transaction)
+        transaction.mark_deleted()
+
+        next_transaction_id = self._next_transaction_id()
+        self.history.delete(transaction.id, next_transaction_id)
+
+        self._write_transaction_id(next_transaction_id)
+        self._touch_pingme(round(time.time()))
 
     def commit(self, transaction):
         self._create_dirs()

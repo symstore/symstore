@@ -13,3 +13,9 @@ class UnknownFileExtension(Exception):
 class FileNotFound(Exception):
     def __init__(self, filename):
         self.filename = filename
+
+
+class TransactionNotFound(Exception):
+    """
+    raised when symstore does not contain transaction with specified ID
+    """

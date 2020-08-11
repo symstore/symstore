@@ -111,7 +111,7 @@ def _file_part(path):
 
 def run_script(symstore_path, files, options=[]):
     files = [path.join(SYMFILES_DIR, f) for f in files]
-    command = [SYMSTORE_COMMAND, symstore_path] + options + files
+    command = [SYMSTORE_COMMAND] + options + [symstore_path] + files
     if conf.WITH_COVERAGE:
         command = ["coverage", "run", "-p"] + command
 

@@ -9,6 +9,7 @@ from symstore.version import VERSION
 from symstore.errs import FileFormatError
 from symstore.errs import UnknownFileExtension
 from symstore.errs import FileNotFound
+from symstore.errs import TransactionNotFound
 
 
 __all__ = [
@@ -20,5 +21,6 @@ __all__ = [
     "FileFormatError",
     "UnknownFileExtension",
     "FileNotFound",
+    "TransactionNotFound",
     "VERSION"
 ]
