@@ -130,8 +130,10 @@ class TransactionEntry:
             # TODO handle I/O errors
 
     def __str__(self):
-        return """"%s\%s","%s""""" % (self.file_name,  # noqa: W605
-            self.file_hash, path.abspath(self.source_file))
+        return r""""%s\%s","%s""""" % \
+               (self.file_name,
+                self.file_hash,
+                path.abspath(self.source_file))
 
 
 class Transaction:
