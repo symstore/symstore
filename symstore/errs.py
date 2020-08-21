@@ -8,3 +8,8 @@ class FileFormatError(Exception):
 class UnknownFileExtension(Exception):
     def __init__(self, file_extension):
         self.file_extension = file_extension
+
+
+class FileNotFound(Exception):
+    def __init__(self, filename):
+        self.filename = filename

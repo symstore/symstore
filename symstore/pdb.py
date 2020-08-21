@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 
-import io
 import math
 import struct
 import binascii
 from symstore import errs
+from symstore import fileio
 
 SIGNATURE = b"Microsoft C/C++ MSF 7.00\r\n\x1ADS\0\0\0"
 
@@ -167,13 +167,15 @@ class PDBFile:
     Simple PDB (program database) file parser the loads files GUID and Age
     fields.
 
-    The GUID and Age values are accessable as following object members:
+    The GUID and Age values are accessible as following object members:
 
         guid - PDB file's GUID as an instance of GUID class
         age  - PDB file's Age, as an integer
+
+    :raises symstore.FileNotFoundError: if specified file does not exist
     """
     def __init__(self, filepath):
-        with io.open(filepath, "rb") as f:
+        with fileio.open_rb(filepath) as f:
 
             # Check signature
             sig = f.read(len(SIGNATURE))

@@ -183,6 +183,7 @@ class Transaction:
 
     def add_file(self, file, compress=False):
         """
+        :raises symstore.FileNotFound: if specified file not found
         :raises pe.PEFormatError: on errors parsing PE (.exe/.dll) files
         :raises UnknownFileExtension: if file extension is not .pdb/.exe/.dll
         """

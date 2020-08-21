@@ -1,3 +1,4 @@
+from os import path
 from tests.cli import util
 from tests import testcase
 
@@ -46,3 +47,30 @@ class TestUnknownExtension(testcase.TestCase):
         retcode, stderr = util.run_script(SYMSTORE_PATH, [filename])
         self.assertErrorMsg(retcode, stderr, filename,
                             "unknown file extension 'ext'")
+
+
+class TestFileNotFound(testcase.TestCase):
+    PDB_FILE = "noexist.pdb"
+    PE_FILE = "noexist.exe"
+
+    def test_pdb_not_found(self):
+        # full path to our non-existing file
+        pdb_path = path.join(util.SYMFILES_DIR, self.PDB_FILE)
+        # make sure file don't exist
+        self.assertFalse(path.exists(pdb_path))
+
+        # run the script, and check that we get proper error message
+        retcode, stderr = util.run_script(SYMSTORE_PATH, [self.PDB_FILE])
+        self.assertEqual(retcode, 1)
+        self.assertRegex(stderr.decode(), "No such file: %s" % pdb_path)
+
+    def test_pe_not_found(self):
+        # full path to our non-existing file
+        exe_path = path.join(util.SYMFILES_DIR, self.PE_FILE)
+        # make sure file don't exist
+        self.assertFalse(path.exists(exe_path))
+
+        # run the script, and check that we get proper error message
+        retcode, stderr = util.run_script(SYMSTORE_PATH, [self.PE_FILE])
+        self.assertEqual(retcode, 1)
+        self.assertRegex(stderr.decode(), "No such file: %s" % exe_path)

@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
 import os
-import io
 import struct
 from symstore import errs
+from symstore import fileio
 
 PE_SIGNATURE = b"PE\0\0"
 PE_SIGNATURE_POINTER = 0x3C
@@ -70,9 +70,11 @@ class PEFile:
     the same name, e.g.
 
         PEFile("some.exe").TimeDateStamp
+
+    :raises symstore.FileNotFoundError: if specified file does not exist
     """
     def __init__(self, filepath):
-        with io.open(filepath, "rb") as f:
+        with fileio.open_rb(filepath) as f:
             fsize = os.fstat(f.fileno()).st_size
 
             # load PE signature offset

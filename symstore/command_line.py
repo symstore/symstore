@@ -87,3 +87,5 @@ def main():
         err_exit("%s: invalid %s file: %s" % (file, e.format_name, e))
     except CompressionNotSupported:
         err_exit("gcab module not available, compression not supported")
+    except symstore.FileNotFound as e:
+        err_exit("No such file: %s" % e.filename)
