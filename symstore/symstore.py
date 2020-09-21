@@ -12,15 +12,24 @@ from symstore import errs
 from symstore import fileio
 from datetime import datetime
 
-TRANSACTION_LINE_RE = re.compile(
+
+TRANSACTION_PREFIX_RE = re.compile(
     r"(\d+),"
     r"(add|del),"
+    r"(.*)"
+)
+
+TRANSACTION_ADD_RE = re.compile(
     r"(file|ptr),"
     r"((?:\d\d/\d\d/\d\d\d\d),(?:\d\d:\d\d:\d\d)),"
     "\"([^\"]*)\","
     "\"([^\"]*)\","
     "\"([^\"]*)\","
     r".*")
+
+TRANSACTION_DEL_RE = re.compile(
+    r"(\d+)"
+)
 
 ADMIN_DIR = "000Admin"
 LAST_ID_FILE = path.join(ADMIN_DIR, "lastid.txt")
@@ -144,7 +153,8 @@ class Transaction:
     transaction_entry_class = TransactionEntry
 
     def __init__(self, symstore, id=None, type="add", ref="file",
-                 timestamp=None, product=None, version=None, comment=None):
+                 timestamp=None, product=None, version=None, comment=None,
+                 deleted_id=None):
 
         self._symstore = symstore
         self._entries = None
@@ -155,6 +165,7 @@ class Transaction:
         self.product = product
         self.version = version
         self.comment = comment
+        self.deleted_id = deleted_id
 
     def _commited(self):
         return self.id is not None
@@ -242,11 +253,22 @@ class Transaction:
 
 def parse_transaction_line(line):
     # TODO handle parse errors in this function
-    (id, type, ref, timestamp, product, version, comment) = \
-        TRANSACTION_LINE_RE.match(line).groups()
+    (id, type, tail) = TRANSACTION_PREFIX_RE.match(line).groups()
 
-    ts = datetime.strptime(timestamp, "%m/%d/%Y,%H:%M:%S")
-    return id, type, ref,  ts, product, version, comment
+    if type == "add":
+        # this is an 'add' transaction
+        (ref, timestamp, product, version, comment) = \
+            TRANSACTION_ADD_RE.match(tail).groups()
+
+        timestamp = datetime.strptime(timestamp, "%m/%d/%Y,%H:%M:%S")
+        return dict(id=id, type=type, ref=ref, timestamp=timestamp,
+                    product=product, version=version, comment=comment)
+
+    # this should be a delete transaction
+    assert type == "del"
+    (deleted_id,) = TRANSACTION_DEL_RE.match(tail).groups()
+
+    return dict(id=id, type=type, deleted_id=deleted_id)
 
 
 class FilesMap:
@@ -299,7 +321,7 @@ class Transactions:
         with self._server_file() as sfile:
             for line in sfile.readlines():
                 transaction = self.transaction_class(
-                    self._symstore, *parse_transaction_line(line))
+                    self._symstore, **parse_transaction_line(line))
 
                 transactions[transaction.id] = transaction
 
@@ -389,7 +411,7 @@ class History:
         with self._history_file() as hfile:
             for line in hfile.readlines():
                 transaction = self.transaction_class(
-                    self._symstore, *parse_transaction_line(line))
+                    self._symstore, **parse_transaction_line(line))
 
                 transactions.append(transaction)
 
