@@ -14,7 +14,7 @@ class TestInvalidPEFile(testcase.TestCase):
 
     def test_empty_exe(self):
         """
-        will hit 'reading beyoned end of file error"
+        will hit 'reading beyond end of file error"
         """
         retcode, stderr = util.run_script(SYMSTORE_PATH, ["empty.exe"])
         self.assertInvalidPEMsg(retcode, stderr, "PE", "empty.exe")
@@ -26,6 +26,20 @@ class TestInvalidPEFile(testcase.TestCase):
     def test_invalid_pdb(self):
         retcode, stderr = util.run_script(SYMSTORE_PATH, ["invalid.pdb"])
         self.assertInvalidPEMsg(retcode, stderr, "PDB", "invalid.pdb")
+
+
+class TestTransactionNotFound(util.CliTester):
+    initial_dir_zip = "existing_store.zip"
+
+    def test_del_unknown_transaction(self):
+        """
+        test deleting non-existing transaction
+        """
+        retcode, stderr = util.run_script(SYMSTORE_PATH, [],
+                                          ["--delete", "0000000042"])
+        self.assertEqual(retcode, 1)
+        self.assertRegex(stderr.decode(),
+                         "no transaction with id '0000000042' found")
 
 
 class TestUnknownExtension(testcase.TestCase):

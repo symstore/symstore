@@ -1,5 +1,4 @@
 import io
-import unittest
 import tempfile
 import time
 import shutil
@@ -12,7 +11,7 @@ from distutils import spawn
 
 import symstore
 
-from tests import conf
+from tests import conf, testcase
 
 # the message when skipping compression tests
 NO_COMP_SKIP = "gcab not available, compression not supported on this system"
@@ -132,7 +131,7 @@ def line_end():
     return "\n"
 
 
-class CliTester(unittest.TestCase):
+class CliTester(testcase.TestCase):
     initial_dir_zip = None
 
     def recordStartTime(self):
@@ -193,8 +192,28 @@ class CliTester(unittest.TestCase):
                              "Unexpected contents for %s/%s" %
                              (expected.file_name, expected.file_hash))
 
+    def _assert_transaction_timestamp(self, expected, got, modify_timestamp):
+        self.assertEqual(expected.type, got.type)
+
+        if got.type == "del":
+            # delete transaction have no time-stamps
+            self.assertIsNone(got.timestamp)
+            return
+
+        # this should be an 'add' transaction
+        self.assertEqual(got.type, "add")
+
+        # check that got time-stamp is within reasonable time bounds
+        self.assertLessEqual(expected.timestamp, got.timestamp,
+                             "too early transaction time stamp")
+
+        self.assertLessEqual(got.timestamp, modify_timestamp,
+                             "too late transaction time stamp")
+
     def _assert_transaction_metadata(self, expected, got, modify_timestamp):
-        for attrname in ["id", "type", "ref", "product", "version", "comment"]:
+        attrs = ["id", "type", "ref", "product", "version",
+                 "comment", "deleted_id"]
+        for attrname in attrs:
             exp_attr = getattr(expected, attrname)
             got_attr = getattr(got, attrname)
             self.assertEqual(exp_attr, got_attr,
@@ -202,11 +221,7 @@ class CliTester(unittest.TestCase):
                              "expected '%s', got '%s'" %
                              (attrname, exp_attr, got_attr))
 
-        self.assertLessEqual(expected.timestamp, got.timestamp,
-                             "too early transaction time stamp")
-
-        self.assertLessEqual(got.timestamp, modify_timestamp,
-                             "too late transaction time stamp")
+        self._assert_transaction_timestamp(expected, got, modify_timestamp)
 
     def _assert_transaction(self, expected, got, modify_timestamp):
         self._assert_transaction_metadata(expected, got, modify_timestamp)
