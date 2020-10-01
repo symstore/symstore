@@ -92,6 +92,13 @@ In case symstore is not able to locate python-gi and gir packages while compress
 Change Log
 ==========
 
+0.3.0 (1 October 2020)
+----------------------
+
+* support for deleting transactions
+* better error message when specified PDB/EXE/DLL is not found
+* officially support python 3.8
+
 0.2.7 (25 September 2019)
 -------------------------
 
