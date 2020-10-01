@@ -92,11 +92,9 @@ Making a Release to PyPi
 
     [pypi]
     repository=https://upload.pypi.org/legacy/
-    username=user
 
     [pypitest]
     repository=https://test.pypi.org/legacy/
-    username=user
 
 * pip install twine
 
