@@ -73,7 +73,7 @@ The compression mode is activated with ``--compress`` or ``-z`` flag to ``symsto
 Symstore uses the native ``gcab`` library via python bindings to compress data.
 The required packages must be available on the system for the compression mode to work.
 
-On Ubuntu 18.04, install following packages:
+On Ubuntu 20.04 or 18.04, install following packages:
 
   * gir1.2-gcab-1.0
   * python-gi
