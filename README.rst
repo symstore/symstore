@@ -83,7 +83,12 @@ On ubuntu 16.04, install following packages:
   * gir1.2-libgcab-1.0
   * python-gi
 
-In case symstore is not able to locate python-gi and gir packages while compression mode is requested, following error message will be displayed:
+On FreeBSD 12.2, install following binary packages:
+
+ * gcab
+ * py37-gobject3
+
+In case symstore is unable to load required packages while compression mode is requested, following error message will be displayed:
 
 .. code:: sh
 
