@@ -70,15 +70,15 @@ This can lead to significant reduction of data that needs to be transferred whil
 
 The compression mode is activated with ``--compress`` or ``-z`` flag to ``symstore`` command line utility.
 
-Symstore uses the native ``gcab`` library via introspection to compress data.
+Symstore uses the native ``gcab`` library via python bindings to compress data.
 The required packages must be available on the system for the compression mode to work.
 
-On ubuntu 18.04, install following packages:
+On Ubuntu 18.04, install following packages:
 
   * gir1.2-gcab-1.0
   * python-gi
 
-On ubuntu 16.04, install following packages:
+On Ubuntu 16.04, install following packages:
 
   * gir1.2-libgcab-1.0
   * python-gi
