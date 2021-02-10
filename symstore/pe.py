@@ -42,9 +42,9 @@ class PEFormatError(errs.FileFormatError):
     format_name = "PE"
 
 
-def _read_i32(file, size, offset):
+def _read_u32(file, size, offset):
     """
-    Read 32-bit little-endian integer from an opened file.
+    Read 32-bit little-endian unsigned integer from an opened file.
 
     :param file: opended file handle
     :param size: file szie
@@ -56,7 +56,7 @@ def _read_i32(file, size, offset):
 
     file.seek(offset)
 
-    return struct.unpack("<i", file.read(4))[0]
+    return struct.unpack("<I", file.read(4))[0]
 
 
 class PEFile:
@@ -78,7 +78,7 @@ class PEFile:
             fsize = os.fstat(f.fileno()).st_size
 
             # load PE signature offset
-            pe_sig_offset = _read_i32(f, fsize, PE_SIGNATURE_POINTER)
+            pe_sig_offset = _read_u32(f, fsize, PE_SIGNATURE_POINTER)
 
             # check that file contains valid PE signature
             f.seek(pe_sig_offset)
@@ -87,10 +87,10 @@ class PEFile:
 
             # load TimeDateStamp field
             self.TimeDateStamp = \
-                _read_i32(f, fsize, pe_sig_offset+TIME_DATE_STAMP_OFFSET)
+                _read_u32(f, fsize, pe_sig_offset+TIME_DATE_STAMP_OFFSET)
 
             # load SizeOfImage field
-            self.SizeOfImage = _read_i32(f, fsize,
+            self.SizeOfImage = _read_u32(f, fsize,
                                          pe_sig_offset +
                                          OPTIONAL_HEADER_OFFSET +
                                          SIZE_OF_IMAGE_OFFSET)
