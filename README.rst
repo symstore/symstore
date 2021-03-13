@@ -97,6 +97,13 @@ In case symstore is unable to load required packages while compression mode is r
 Change Log
 ==========
 
+0.3.1 (14 March 2021)
+---------------------
+
+* fixes EXE/DLL parsing bug which generated wrong hashes (pull request #16)
+* add information on enabling compression on FreeBSD 12.2 and Ubuntu 20.04
+* officially support python 3.9
+
 0.3.0 (1 October 2020)
 ----------------------
 
