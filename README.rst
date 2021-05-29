@@ -70,7 +70,10 @@ This can lead to significant reduction of data that needs to be transferred whil
 
 The compression mode is activated with ``--compress`` or ``-z`` flag to ``symstore`` command line utility.
 
-Symstore uses the native ``gcab`` library via python bindings to compress data.
+On Windows OSes, symstore will just call the ``makecab.exe`` utility that is included
+in all version of Windows to perform the compression.
+
+On other OSes, Symstore uses the native ``gcab`` library via python bindings to compress data.
 The required packages must be available on the system for the compression mode to work.
 
 On Ubuntu 20.04 or 18.04, install following packages:
