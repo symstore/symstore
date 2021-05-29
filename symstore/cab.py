@@ -4,7 +4,7 @@ import os
 compression_supported = True
 
 if os.name == 'nt':
-    # Use built-in makecab CLI utility on Windows OSes (included in PATH on all Windows versions)
+    # Use built-in makecab CLI utility which is included in all Windows OSes
     import subprocess
 else:
     try:
@@ -21,7 +21,8 @@ else:
 def compress(src_path, dest_path):
     assert compression_supported
     if os.name == 'nt':
-        args = ['makecab', '/D', 'CompressionType=LZX', '/D', 'CompressionMemory=21', src_path, dest_path]
+        args = ['makecab', '/D', 'CompressionType=LZX',
+                '/D', 'CompressionMemory=21', src_path, dest_path]
         subprocess.run(args, check=True, capture_output=True)
     else:
         cab_file = GCab.File.new_with_file(os.path.basename(src_path),
@@ -35,6 +36,6 @@ def compress(src_path, dest_path):
 
         out_file = Gio.File.new_for_path(dest_path)
         cab.write_simple(out_file.replace(None,
-                                          False,
-                                          Gio.FileCreateFlags.REPLACE_DESTINATION,
-                                          None))
+                                      False,
+                                      Gio.FileCreateFlags.REPLACE_DESTINATION,
+                                      None))
