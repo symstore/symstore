@@ -1,4 +1,7 @@
+from __future__ import absolute_import
+
 import os
+from symstore import errs
 
 # 'points' to suitable cab compression function,
 # as initilized on module import
@@ -33,7 +36,16 @@ def _compress_makecab(src_path, dest_path):
     """
     args = ["makecab.exe", "/D", "CompressionType=LZX",
             "/D", "CompressionMemory=21", src_path, dest_path]
-    subprocess.run(args, check=True, capture_output=True)
+
+    # use Popen() API to launch makecab.exe,
+    # as this is the only suitable API available in python 2.7 and 3.4
+    proc = subprocess.Popen(args,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+    out, _ = proc.communicate()
+
+    if proc.returncode != 0:
+        raise errs.CabCompressionError("%s" % out.decode())
 
 
 if os.name != "nt":
@@ -43,7 +55,7 @@ if os.name != "nt":
     #
     try:
         import gi
-        gi.require_version('GCab', '1.0')
+        gi.require_version("GCab", "1.0")
         from gi.repository import GCab
         from gi.repository import Gio
 

@@ -95,6 +95,8 @@ def add_action(sym_store, files, product_name, product_version, compress):
         err_exit("gcab module not available, compression not supported")
     except symstore.FileNotFound as e:
         err_exit("No such file: %s" % e.filename)
+    except symstore.CabCompressionError as e:
+        err_exit("Error creating CAB\n%s" % e)
 
 
 def main():

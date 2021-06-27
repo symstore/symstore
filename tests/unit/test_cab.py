@@ -1,6 +1,9 @@
+import subprocess
 import mock
 import importlib
 import unittest
+from symstore import CabCompressionError
+from tests import testcase
 
 
 orig_import = __import__
@@ -77,6 +80,51 @@ class TestNoGcab(unittest.TestCase):
         self.assertIsNone(symstore.cab.compress)
 
 
+@mock.patch("subprocess.Popen")
+class TestCompressMakecab(testcase.TestCase):
+    ERROR_MSG = b"makecab error msg"
+
+    def test_compress_ok(self, popen_mock):
+        """
+        check that _compress_makecab() invokes 'makecab.exe' with
+        expected arguments
+        """
+
+        proc_mock = popen_mock.return_value
+        proc_mock.communicate.return_value = (None, None)
+        proc_mock.returncode = 0
+
+        with mock.patch("os.name", "nt"):
+            import symstore.cab
+            _reload(symstore.cab)
+
+            symstore.cab._compress_makecab("some.pdb", "some.pd_")
+
+        popen_mock.assert_called_once_with(
+            ["makecab.exe", "/D", "CompressionType=LZX", "/D",
+             "CompressionMemory=21", "some.pdb", "some.pd_"],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    def test_compress_error(self, popen_mock):
+        """
+        check that _compress_makecab() invokes 'makecab.exe' with
+        expected arguments
+        """
+
+        proc_mock = popen_mock.return_value
+        proc_mock.communicate.return_value = (self.ERROR_MSG, None)
+        proc_mock.returncode = 1
+
+        with mock.patch("os.name", "nt"):
+            import symstore.cab
+            _reload(symstore.cab)
+
+            self.assertRaisesRegex(CabCompressionError,
+                                   self.ERROR_MSG.decode(),
+                                   symstore.cab._compress_makecab,
+                                   "src", "dest")
+
+
 class TestWinCab(unittest.TestCase):
     def test_import_win(self):
         """
@@ -89,20 +137,3 @@ class TestWinCab(unittest.TestCase):
 
             self.assertEqual(symstore.cab.compress,
                              symstore.cab._compress_makecab)
-
-    @mock.patch("subprocess.run")
-    def test_compress_makecab(self, run_mock):
-        """
-        check that _compress_makecab() invokes 'makecab.exe' with
-        expected arguments
-        """
-        with mock.patch("os.name", "nt"):
-            import symstore.cab
-            _reload(symstore.cab)
-
-            symstore.cab._compress_makecab("some.pdb", "some.pd_")
-
-        run_mock.assert_called_once_with(
-            ["makecab.exe", "/D", "CompressionType=LZX", "/D",
-             "CompressionMemory=21", "some.pdb", "some.pd_"],
-            check=True, capture_output=True)

@@ -19,3 +19,9 @@ class TransactionNotFound(Exception):
     """
     raised when symstore does not contain transaction with specified ID
     """
+
+
+class CabCompressionError(Exception):
+    """
+    raised on error creating CAB archive
+    """
