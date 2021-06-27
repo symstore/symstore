@@ -70,10 +70,7 @@ This can lead to significant reduction of data that needs to be transferred whil
 
 The compression mode is activated with ``--compress`` or ``-z`` flag to ``symstore`` command line utility.
 
-On Windows OSes, symstore will just call the ``makecab.exe`` utility that is included
-in all version of Windows to perform the compression.
-
-On other OSes, Symstore uses the native ``gcab`` library via python bindings to compress data.
+On non-Windows systems, symstore uses the native ``gcab`` library via python bindings to compress data.
 The required packages must be available on the system for the compression mode to work.
 
 On Ubuntu 20.04 or 18.04, install following packages:
@@ -91,11 +88,15 @@ On FreeBSD 12.2, install following binary packages:
  * gcab
  * py37-gobject3
 
-In case symstore is unable to load required packages while compression mode is requested, following error message will be displayed:
+If symstore is unable to load required packages while compression mode is requested, following error message will be displayed:
 
 .. code:: sh
 
     gcab module not available, compression not supported
+
+On Windows systems, symstore uses the standard ``makecab.exe`` utility.
+The ``makecab.exe`` utility normally is included by default in Windows installations, thus symstore compression will work out-of-box.
+
 
 Change Log
 ==========
