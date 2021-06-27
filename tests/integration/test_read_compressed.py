@@ -9,7 +9,7 @@ from tests.cli import util
 from tests import testcase
 
 
-@unittest.skipIf(not cab.compression_supported, util.NO_COMP_SKIP)
+@unittest.skipIf(cab.compress is None, util.NO_COMP_SKIP)
 class TestOpenCompressedEntry(testcase.TestCase):
     """
     test trying to open an compressed transaction entry's data

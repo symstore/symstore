@@ -64,7 +64,7 @@ def check_compression_support(compress_flag):
         return
 
     from symstore import cab
-    if not cab.compression_supported:
+    if cab.compress is None:
         raise CompressionNotSupported()
 
 

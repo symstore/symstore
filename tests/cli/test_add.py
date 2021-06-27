@@ -29,7 +29,7 @@ class TestNewStore(util.CliTester):
 
         self.assertSymstoreDir("new_store.zip")
 
-    @unittest.skipIf(not cab.compression_supported, util.NO_COMP_SKIP)
+    @unittest.skipIf(cab.compress is None, util.NO_COMP_SKIP)
     def test_add_compressed_pdb(self):
         self.run_add_command(["--compress", "--product-name", "dummyprod"],
                              ["dummyprog.pdb"])
@@ -72,7 +72,7 @@ class TestExistingStore(util.CliTester):
 class TestRepublishCompressed(util.CliTester):
     initial_dir_zip = "new_store_compressed.zip"
 
-    @unittest.skipIf(not cab.compression_supported, util.NO_COMP_SKIP)
+    @unittest.skipIf(cab.compress is None, util.NO_COMP_SKIP)
     def test_republish(self):
         self.run_add_command(["--compress", "--product-name", "dummyprod"],
                              ["dummyprog.pdb"])

@@ -65,7 +65,7 @@ class TestNoGcab(unittest.TestCase):
         """
         import symstore.cab
         _reload(symstore.cab)
-        self.assertFalse(symstore.cab.compression_supported)
+        self.assertIsNone(symstore.cab.compress)
 
     @mock.patch(IMPORT_MODULE, side_effect=no_gcab_namespace)
     def test_no_gcab_namespace(self, _):
@@ -74,4 +74,35 @@ class TestNoGcab(unittest.TestCase):
         """
         import symstore.cab
         _reload(symstore.cab)
-        self.assertFalse(symstore.cab.compression_supported)
+        self.assertIsNone(symstore.cab.compress)
+
+
+class TestWinCab(unittest.TestCase):
+    def test_import_win(self):
+        """
+        check that under windows, the 'makecab' implementation
+        of cab compression is loaded
+        """
+        with mock.patch("os.name", "nt"):
+            import symstore.cab
+            _reload(symstore.cab)
+
+            self.assertEqual(symstore.cab.compress,
+                             symstore.cab._compress_makecab)
+
+    @mock.patch("subprocess.run")
+    def test_compress_makecab(self, run_mock):
+        """
+        check that _compress_makecab() invokes 'makecab.exe' with
+        expected arguments
+        """
+        with mock.patch("os.name", "nt"):
+            import symstore.cab
+            _reload(symstore.cab)
+
+            symstore.cab._compress_makecab("some.pdb", "some.pd_")
+
+        run_mock.assert_called_once_with(
+            ["makecab.exe", "/D", "CompressionType=LZX", "/D",
+             "CompressionMemory=21", "some.pdb", "some.pd_"],
+            check=True, capture_output=True)
