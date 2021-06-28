@@ -101,6 +101,11 @@ The ``makecab.exe`` utility normally is included by default in Windows installat
 Change Log
 ==========
 
+0.3.2 (28 June 2021)
+--------------------
+
+* support compression on windows (pull request #18)
+
 0.3.1 (14 March 2021)
 ---------------------
 
