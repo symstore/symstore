@@ -9,7 +9,7 @@ setuptools.setup(
     version=symstore.VERSION,
     description="publish PDB and PE files to symbols store",
     long_description=fileio.read_all("README.rst"),
-    url="https://github.com/elmirjagudin/symstore",
+    url="https://github.com/symstore/symstore",
     classifiers=[
         "Intended Audience :: Developers",
         "Programming Language :: Python :: 2.7",
