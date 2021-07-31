@@ -1,11 +1,8 @@
-===============================
-Developing the symstore Package
-===============================
+# Developing the symstore Package
 
 Information on setting up development environment and running checks.
 
-Setting Up Development Environment
-==================================
+## Setting Up Development Environment
 
 The recommended set-up is to create a virtualenv sandbox and install the symstore package in the sandbox with pip.
 
@@ -35,8 +32,7 @@ This will make in in-place installation of the symstore package.
 It will also install all the necessary tools for development.
 
 
-Running Tests and Checks
-========================
+## Running Tests and Checks
 
 To run all tests and checks goto the root directory of the repository and type:
 
@@ -46,8 +42,7 @@ To run all tests and checks goto the root directory of the repository and type:
 
 This will run all tests and perform flake8 static check on the code.
 
-Make targets
-------------
+### Make targets
 
 The Makefile provides following targets:
 
@@ -78,8 +73,7 @@ Stores the report in ``htmlcov`` directory.
 The default target.
 Will run flake8 checks and integrations tests.
 
-Making a Release to PyPi
-========================
+## Making a Release to PyPi
 
 * create ~/.pypirc
 
