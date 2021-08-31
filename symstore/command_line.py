@@ -23,6 +23,10 @@ def parse_args():
                         action="store_true",
                         help="publish compressed files")
 
+    parser.add_argument("-n", "--no-override",
+                        action="store_true",
+                        help="Dont publish files again if they already exist in symstore")
+
     parser.add_argument("-p", "--product-name", default="",
                         help="name of the product")
 
@@ -75,7 +79,7 @@ def delete_action(sym_store, transaction_id):
         err_exit("no transaction with id '%s' found" % transaction_id)
 
 
-def add_action(sym_store, files, product_name, product_version, compress):
+def add_action(sym_store, files, product_name, product_version, compress, no_override):
     try:
         # error-out if no compression
         check_compression_support(compress)
@@ -83,7 +87,7 @@ def add_action(sym_store, files, product_name, product_version, compress):
         # create new add transaction, add all specified files
         transaction = sym_store.new_transaction(product_name, product_version)
         for file in files:
-            transaction.add_file(file, compress)
+            transaction.add_file(file, compress, no_override)
 
         # commit the transaction to the store
         sym_store.commit(transaction)
@@ -109,4 +113,4 @@ def main():
 
     # otherwise this is an 'add' action
     add_action(sym_store, args.files, args.product_name,
-               args.product_version, args.compress)
+               args.product_version, args.compress, args.no_override)

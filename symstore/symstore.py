@@ -91,12 +91,13 @@ def _is_empty_dir(dir_path):
 
 class TransactionEntry:
     def __init__(self, symstore, file_name, file_hash, source_file,
-                 compressed=False):
+                 compressed=False, no_override=False):
         self._symstore = symstore
         self.file_name = file_name
         self.file_hash = file_hash
         self.source_file = source_file
         self.compressed = compressed
+        self.no_override = no_override
 
     @classmethod
     def load(cls, symstore, file_name, file_hash, source_file):
@@ -131,15 +132,18 @@ class TransactionEntry:
         publish this entry's source file inside symstore
         """
         dest_dir = self._dest_dir()
+        dest_file = path.join(dest_dir, self.file_name[:-1]+"_") if self.compressed else path.join(dest_dir, self.file_name)
+
+        if self.no_override and path.isfile(dest_file):
+            return
 
         if not path.isdir(dest_dir):
             os.makedirs(dest_dir)
 
         if self.compressed:
-            cab.compress(self.source_file,
-                         path.join(dest_dir, self.file_name[:-1]+"_"))
+            cab.compress(self.source_file, dest_file)
         else:
-            shutil.copy(self.source_file, dest_dir)
+            shutil.copy(self.source_file, dest_file)
             # TODO handle I/O errors
 
     def __str__(self):
@@ -198,7 +202,7 @@ class Transaction:
 
         return entries
 
-    def add_file(self, file, compress=False):
+    def add_file(self, file, compress=False, no_override=False):
         """
         :raises symstore.FileNotFound: if specified file not found
         :raises pe.PEFormatError: on errors parsing PE (.exe/.dll) files
@@ -208,7 +212,8 @@ class Transaction:
                                  path.basename(file),
                                  _file_hash(file),
                                  file,
-                                 compress)
+                                 compress,
+                                 no_override)
         # TODO handle I/O errors from _file_hash()
 
         self.entries.append(entry)
