@@ -126,6 +126,12 @@ class TransactionEntry:
         fpath = path.join(self._dest_dir(), self.file_name)
         return fileio.read_all(fpath, "rb")
 
+    def exists(self):
+        """
+        returns True is this entry have published
+        """
+        return path.isdir(self._dest_dir())
+
     def publish(self):
         """
         publish this entry's source file inside symstore
@@ -198,19 +204,20 @@ class Transaction:
 
         return entries
 
-    def add_file(self, file, compress=False):
+    def new_entry(self, file, compress=False):
         """
         :raises symstore.FileNotFound: if specified file not found
         :raises pe.PEFormatError: on errors parsing PE (.exe/.dll) files
         :raises UnknownFileExtension: if file extension is not .pdb/.exe/.dll
         """
-        entry = TransactionEntry(self._symstore,
-                                 path.basename(file),
-                                 _file_hash(file),
-                                 file,
-                                 compress)
         # TODO handle I/O errors from _file_hash()
+        return TransactionEntry(self._symstore,
+                                path.basename(file),
+                                _file_hash(file),
+                                file,
+                                compress)
 
+    def add_entry(self, entry):
         self.entries.append(entry)
 
     @property

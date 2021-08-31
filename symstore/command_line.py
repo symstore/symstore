@@ -17,29 +17,36 @@ def parse_args():
 
     parser.add_argument("-d", "--delete",
                         metavar="TRANSACTION_ID",
-                        help="delete transaction")
+                        help="Delete transaction.")
 
     parser.add_argument("-z", "--compress",
                         action="store_true",
-                        help="publish compressed files")
+                        help="Publish compressed files.")
 
     parser.add_argument("-p", "--product-name", default="",
-                        help="name of the product")
+                        help="Name of the product.")
 
     parser.add_argument("-r", "--product-version", default="",
-                        help="version of the product")
+                        help="Version of the product.")
+
+    parser.add_argument("-s", "--skip-published",
+                        action="store_true",
+                        default=False,
+                        help="Exclude all previously published files from "
+                             "transaction.  Uses file's hash to check if it's "
+                             "already exists in the store.")
 
     parser.add_argument("--version",
                         action="version",
                         version="symstore %s" % symstore.VERSION,
-                        help="show program's version number and exit")
+                        help="Show program's version number and exit.")
 
     parser.add_argument("store_path", metavar="STORE_PATH",
                         type=str,
-                        help="root directory of the symbol store")
+                        help="Root directory of the symbol store.")
 
     parser.add_argument("files", metavar="FILE", type=str, nargs="*",
-                        help="PDB or PE file(s) to publish")
+                        help="PDB or PE file(s) to publish.")
 
     return parser.parse_args()
 
@@ -75,7 +82,8 @@ def delete_action(sym_store, transaction_id):
         err_exit("no transaction with id '%s' found" % transaction_id)
 
 
-def add_action(sym_store, files, product_name, product_version, compress):
+def add_action(sym_store, files, product_name, product_version, compress,
+               skip_published):
     try:
         # error-out if no compression
         check_compression_support(compress)
@@ -83,7 +91,17 @@ def add_action(sym_store, files, product_name, product_version, compress):
         # create new add transaction, add all specified files
         transaction = sym_store.new_transaction(product_name, product_version)
         for file in files:
-            transaction.add_file(file, compress)
+            entry = transaction.new_entry(file, compress)
+
+            if skip_published and entry.exists():
+                # 'skip published' mode is on and this files
+                # have already been published, skip it skipper
+                continue
+
+            transaction.add_entry(entry)
+
+        if len(transaction.entries) == 0:
+            err_exit("no new files to publish")
 
         # commit the transaction to the store
         sym_store.commit(transaction)
@@ -109,4 +127,5 @@ def main():
 
     # otherwise this is an 'add' action
     add_action(sym_store, args.files, args.product_name,
-               args.product_version, args.compress)
+               args.product_version, args.compress,
+               args.skip_published)
