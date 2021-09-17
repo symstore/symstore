@@ -69,6 +69,38 @@ class TestExistingStore(util.CliTester):
         self.assertSymstoreDir("longroot_store.zip")
 
 
+class TestSkipPublished(util.CliTester):
+    """
+    test adding new transaction with '--skip-published' flag enabled
+    """
+    initial_dir_zip = "new_store.zip"
+
+    def test_skip(self):
+        """
+        test adding two files, where:
+
+            dummyprog.pdb - is already published
+            dummylib.dll - have not been published yet
+        """
+        self.run_add_command(
+            ["--skip-published", "--product-name", "dummylib"],
+            ["dummylib.dll", "dummyprog.pdb"])
+
+        self.assertSymstoreDir("skip_republish.zip")
+
+    def test_skip_no_new_files(self):
+        """
+        test adding one file that already have been published
+        """
+        retcode, stderr = util.run_script(self.symstore_path,
+                                          ["dummyprog.pdb"],
+                                          ["--skip-published"])
+
+        # we should get an error message, as there is nothing new to publish
+        self.assertEqual(retcode, 1)
+        self.assertEqual(stderr.decode(), "no new files to publish\n")
+
+
 class TestRepublishCompressed(util.CliTester):
     initial_dir_zip = "new_store_compressed.zip"
 
