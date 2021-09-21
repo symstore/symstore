@@ -3,14 +3,13 @@ from __future__ import absolute_import
 import math
 import struct
 import binascii
-from symstore import errs
 from symstore import fileio
 
 SIGNATURE = b"Microsoft C/C++ MSF 7.00\r\n\x1ADS\0\0\0"
 
 
-class PDBFormatError(errs.FileFormatError):
-    format_name = "PDB"
+class PDBInvalidSignature(Exception):
+    pass
 
 
 def pages(size, page_size):
@@ -180,7 +179,7 @@ class PDBFile:
             # Check signature
             sig = f.read(len(SIGNATURE))
             if sig != SIGNATURE:
-                raise PDBFormatError("Invalid signature")
+                raise PDBInvalidSignature()
 
             # load page size and root stream definition
             page_size, _, _, root_dir_size, _ = \

@@ -7,7 +7,7 @@ from symstore.symstore import Transaction
 from symstore.symstore import TransactionEntry
 from symstore.version import VERSION
 from symstore.errs import FileFormatError
-from symstore.errs import UnknownFileExtension
+from symstore.errs import UnknownFileType
 from symstore.errs import FileNotFound
 from symstore.errs import TransactionNotFound
 from symstore.errs import CabCompressionError
@@ -20,7 +20,7 @@ __all__ = [
     "Transaction",
     "TransactionEntry",
     "FileFormatError",
-    "UnknownFileExtension",
+    "UnknownFileType",
     "FileNotFound",
     "TransactionNotFound",
     "CabCompressionError",

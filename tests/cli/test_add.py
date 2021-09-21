@@ -37,6 +37,54 @@ class TestNewStore(util.CliTester):
         self.assertSymstoreDir("new_store_compressed.zip")
 
 
+class TestAlternativeExtensions(util.CliTester):
+    """
+    Test the case when files have non-standard extensions.
+
+    For example, some common file extensions can be:
+
+      scr : Screensaver (PE/EXE file format)
+      sys : Driver (PE/DLL file format)
+
+    for more details: https://github.com/symstore/symstore/issues/20
+    """
+
+    RENAMED_FILES = [
+        ("dummyprog.exe", "dummyprog.src"),
+        ("dummylib.dll", "dummylib.sys"),
+        ("dummyprog.pdb", "dummyprog.hej")
+    ]
+
+    def setUp(self):
+        self.recordStartTime()
+
+        # create new, initially empty, symbols store
+        tmp_path = tempfile.mkdtemp()
+        self.symstore_path = path.join(tmp_path, "renamed")
+
+        # create some files with alternative extensions,
+        # by copying existing test files to a temp directory
+        # with new names
+        self.renamed_files_dir = tempfile.mkdtemp()
+        for src, dest in self.RENAMED_FILES:
+            shutil.copyfile(util.symfile_path(src),
+                            path.join(self.renamed_files_dir, dest))
+
+    def tearDown(self):
+        # make sure we remove created temp directories
+        shutil.rmtree(path.dirname(self.symstore_path))
+        shutil.rmtree(self.renamed_files_dir)
+
+    def test_publish(self):
+        files = [f for _, f in self.RENAMED_FILES]
+        retcode, stderr = util.run_script(self.symstore_path, files,
+                                          symfiles_dir=self.renamed_files_dir)
+        self.assertEqual(retcode, 0)
+        self.assertEqual(stderr, b"")
+
+        self.assertSymstoreDir("renamed.zip")
+
+
 class TestExistingStore(util.CliTester):
     initial_dir_zip = "new_store.zip"
 

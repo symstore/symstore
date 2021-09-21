@@ -26,6 +26,10 @@ HISTORY_FILE = "%s/%s" % (ADMIN_DIR, "history.txt")
 SERVER_FILE = "%s/%s" % (ADMIN_DIR, "server.txt")
 
 
+def symfile_path(symfile):
+    return path.join(SYMFILES_DIR, symfile)
+
+
 class ZipTransactionEntry(symstore.TransactionEntry):
     @staticmethod
     def _archive_name(file_name, file_hash, compressed=False):
@@ -94,7 +98,7 @@ class ZipSymstore:
 
 
 def _open_zip(zfile_name):
-    return zipfile.ZipFile(path.join(SYMFILES_DIR, zfile_name))
+    return zipfile.ZipFile(symfile_path(zfile_name))
 
 
 def _file_part(path):
@@ -108,8 +112,9 @@ def _file_part(path):
     return path[sep_pos+1:]
 
 
-def run_script(symstore_path, files, options=[]):
-    files = [path.join(SYMFILES_DIR, f) for f in files]
+def run_script(symstore_path, files, options=[], symfiles_dir=SYMFILES_DIR):
+    files = [path.join(symfiles_dir, f) for f in files]
+
     command = [SYMSTORE_COMMAND] + options + [symstore_path] + files
     if conf.WITH_COVERAGE:
         command = ["coverage", "run", "-p"] + command

@@ -6,26 +6,38 @@ SYMSTORE_PATH = "dummy"
 
 
 class TestInvalidPEFile(testcase.TestCase):
-    def assertInvalidPEMsg(self, retcode, msg, type, filename):
+    def assertUnknownFileTypeMsg(self, retcode, msg, filename):
         self.assertEqual(retcode, 1)
         self.assertRegex(msg.decode(),
-                         ".*%s: invalid %s file:.*\n" %
-                         (filename, type), "unexpected error message")
+                         ".*%s: can't figure out file type" % filename,
+                         "unexpected error message")
 
     def test_empty_exe(self):
         """
-        will hit 'reading beyond end of file error"
+        will not find valid PE file signature
         """
         retcode, stderr = util.run_script(SYMSTORE_PATH, ["empty.exe"])
-        self.assertInvalidPEMsg(retcode, stderr, "PE", "empty.exe")
-
-    def test_invalid_exe(self):
-        retcode, stderr = util.run_script(SYMSTORE_PATH, ["invalid.exe"])
-        self.assertInvalidPEMsg(retcode, stderr, "PE", "invalid.exe")
+        self.assertUnknownFileTypeMsg(retcode, stderr, "empty.exe")
 
     def test_invalid_pdb(self):
+        """
+        will not find valid 'PDB file' signature
+        """
         retcode, stderr = util.run_script(SYMSTORE_PATH, ["invalid.pdb"])
-        self.assertInvalidPEMsg(retcode, stderr, "PDB", "invalid.pdb")
+        self.assertUnknownFileTypeMsg(retcode, stderr, "invalid.pdb")
+
+    def test_truncated_exe(self):
+        """
+        test adding a truncated PE file,
+
+        a PE file that contains valid 'PE file' signaure part,
+        but lacks the rest of the contents
+        """
+        retcode, stderr = util.run_script(SYMSTORE_PATH, ["truncated.exe"])
+
+        self.assertEqual(retcode, 1)
+        self.assertRegex(stderr.decode(),
+                         ".*truncated.exe: invalid PE file:.*")
 
 
 class TestTransactionNotFound(util.CliTester):
@@ -40,27 +52,6 @@ class TestTransactionNotFound(util.CliTester):
         self.assertEqual(retcode, 1)
         self.assertRegex(stderr.decode(),
                          "no transaction with id '0000000042' found")
-
-
-class TestUnknownExtension(testcase.TestCase):
-    def assertErrorMsg(self, retcode, stderr, filename, msg):
-        self.assertEqual(retcode, 1)
-        self.assertRegex(stderr.decode(),
-                         ".*%s: %s, can't figure out file format%s" %
-                         (filename, msg, util.line_end()),
-                         "unexpected error message")
-
-    def test_no_extension(self):
-        filename = "no_extension"
-        retcode, stderr = util.run_script(SYMSTORE_PATH, [filename])
-        self.assertErrorMsg(retcode, stderr, filename,
-                            "no file extension")
-
-    def test_unknown_extension(self):
-        filename = "unknown.ext"
-        retcode, stderr = util.run_script(SYMSTORE_PATH, [filename])
-        self.assertErrorMsg(retcode, stderr, filename,
-                            "unknown file extension 'ext'")
 
 
 class TestFileNotFound(testcase.TestCase):

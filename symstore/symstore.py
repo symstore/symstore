@@ -37,20 +37,12 @@ HISTORY_FILE = path.join(ADMIN_DIR, "history.txt")
 SERVER_FILE = path.join(ADMIN_DIR, "server.txt")
 PINGME_FILE = "pingme.txt"
 
-PDB_IMAGE, PE_IMAGE = range(2)
 
-EXT_TYPES = dict(pdb=PDB_IMAGE,
-                 exe=PE_IMAGE,
-                 dll=PE_IMAGE)
-
-
-def _pdb_hash(filename):
-    pdbfile = pdb.PDBFile(filename)
-
+def _pdb_hash(pdbfile):
     # figure out age string to be used in the hash string
     if pdbfile.age is None:
         # some pdb files does not have age,
-        # accoring to symstore.exe we should just
+        # according to symstore.exe we should just
         # skip adding the age to the hash string
         age_str = ""
     else:
@@ -59,30 +51,54 @@ def _pdb_hash(filename):
     return "%s%s" % (pdbfile.guid, age_str)
 
 
-def _pe_hash(file):
-    pefile = pe.PEFile(file)
-
+def _pe_hash(pefile):
     return "%X%X" % (pefile.TimeDateStamp, pefile.SizeOfImage)
 
 
-def _image_type(file):
-    file_ext = path.splitext(file)[1][1:].lower()
+def _probe_pe_hash(fname):
+    """
+    try to parse the specified file as PE file
 
-    if file_ext not in EXT_TYPES:
-        raise errs.UnknownFileExtension(file_ext)
+    on success, return the PE-style hash for the file
+    if can't parse as PE, returns None
+    """
+    try:
+        pefile = pe.PEFile(fname)
+    except pe.PESignatureNotFoundError:
+        # does not look like a PE file
+        return None
 
-    return EXT_TYPES[file_ext]
+    return _pe_hash(pefile)
 
 
-def _file_hash(file):
+def _probe_pdb_hash(fname):
+    """
+    try to parse the specified file as PDB file
 
-    image_type = _image_type(file)
+    on success, return the PDB-style hash for the file
+    if can't parse as PDB, returns None
+    """
+    try:
+        pdbfile = pdb.PDBFile(fname)
+    except pdb.PDBInvalidSignature:
+        return None
 
-    if image_type == PDB_IMAGE:
-        return _pdb_hash(file)
+    return _pdb_hash(pdbfile)
 
-    assert image_type == PE_IMAGE
-    return _pe_hash(file)
+
+def _file_hash(fname):
+    # first try parsing as PE file
+    hash = _probe_pe_hash(fname)
+    if hash is not None:
+        return hash
+
+    # then try to parse as PDB file
+    hash = _probe_pdb_hash(fname)
+    if hash is not None:
+        return hash
+
+    # we don't know the file type
+    raise errs.UnknownFileType()
 
 
 def _is_empty_dir(dir_path):
@@ -206,9 +222,10 @@ class Transaction:
 
     def new_entry(self, file, compress=False):
         """
+        :raises symstore.UnknownFileType: if we can't figure out if
+                                          it's PE or PDB file
         :raises symstore.FileNotFound: if specified file not found
         :raises pe.PEFormatError: on errors parsing PE (.exe/.dll) files
-        :raises UnknownFileExtension: if file extension is not .pdb/.exe/.dll
         """
         # TODO handle I/O errors from _file_hash()
         return TransactionEntry(self._symstore,

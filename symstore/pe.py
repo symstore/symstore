@@ -38,6 +38,10 @@ OPTIONAL_HEADER_OFFSET = \
 SIZE_OF_IMAGE_OFFSET = 56
 
 
+class PESignatureNotFoundError(Exception):
+    pass
+
+
 class PEFormatError(errs.FileFormatError):
     format_name = "PE"
 
@@ -78,12 +82,15 @@ class PEFile:
             fsize = os.fstat(f.fileno()).st_size
 
             # load PE signature offset
-            pe_sig_offset = _read_u32(f, fsize, PE_SIGNATURE_POINTER)
+            try:
+                pe_sig_offset = _read_u32(f, fsize, PE_SIGNATURE_POINTER)
+            except PEFormatError:
+                raise PESignatureNotFoundError()
 
             # check that file contains valid PE signature
             f.seek(pe_sig_offset)
             if f.read(4) != PE_SIGNATURE:
-                raise PEFormatError("PE signature not found")
+                raise PESignatureNotFoundError()
 
             # load TimeDateStamp field
             self.TimeDateStamp = \

@@ -5,9 +5,8 @@ class FileFormatError(Exception):
     pass
 
 
-class UnknownFileExtension(Exception):
-    def __init__(self, file_extension):
-        self.file_extension = file_extension
+class UnknownFileType(Exception):
+    pass
 
 
 class FileNotFound(Exception):

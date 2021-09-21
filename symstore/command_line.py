@@ -56,15 +56,6 @@ def err_exit(error_msg):
     sys.exit(1)
 
 
-def unknown_ext_err(file, file_extension):
-    if len(file_extension) > 0:
-        msg = "unknown file extension '%s'" % file_extension
-    else:
-        msg = "no file extension"
-
-    err_exit("%s: %s, can't figure out file format" % (file, msg))
-
-
 def check_compression_support(compress_flag):
     if not compress_flag:
         # compression not request, no need to check
@@ -105,8 +96,8 @@ def add_action(sym_store, files, product_name, product_version, compress,
 
         # commit the transaction to the store
         sym_store.commit(transaction)
-    except symstore.UnknownFileExtension as e:
-        unknown_ext_err(file, e.file_extension)
+    except symstore.UnknownFileType:
+        err_exit("%s: can't figure out file type" % file)
     except symstore.FileFormatError as e:
         err_exit("%s: invalid %s file: %s" % (file, e.format_name, e))
     except CompressionNotSupported:
