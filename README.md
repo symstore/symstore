@@ -79,11 +79,16 @@ If symstore is unable to load required packages while compression mode is reques
 
     gcab module not available, compression not supported
 
-On Windows systems, symstore uses the standard ``makecab.exe`` utility.
-The ``makecab.exe`` utility normally is included by default in Windows installations, thus symstore compression will work out-of-box.
+On Windows systems, symstore uses the standard `makecab.exe` utility.
+The `makecab.exe` utility normally is included by default in Windows installations, thus symstore compression will work out-of-box.
 
 
 ## Change Log
+
+### 0.3.3 (30 September 2021)
+
+* add `--skip-published` cli flag (pull request #19)
+* support publishing PE files with non-standard file extension (issue #20)
 
 ### 0.3.2 (28 June 2021)
 
