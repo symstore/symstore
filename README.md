@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/symstore/symstore.svg?branch=master)](https://travis-ci.org/symstore/symstore)
+[![Build Status](https://app.travis-ci.com/symstore/symstore.svg?branch=master)](https://app.travis-ci.com/github/symstore/symstore)
 [![Downloads](https://pepy.tech/badge/symstore)](https://pepy.tech/project/symstore)
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/symstore/badges/downloads.svg)](https://anaconda.org/conda-forge/symstore)
 
