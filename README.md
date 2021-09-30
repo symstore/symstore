@@ -6,7 +6,7 @@
 
 A python module and command line utility for publishing windows debugging symbols to symbols store.
 The symbols published in this format can be consumed by the common development tools for windows, such as Visual Studio and WinDbg.
-See `Using SymStore <https://msdn.microsoft.com/en-us/library/windows/desktop/ms681417%28v=vs.85%29.aspx>`_ for more information on windows symbols store.
+See [Using SymStore](https://docs.microsoft.com/en-us/windows/win32/debug/using-symstore) for more information on windows symbols store.
 
 Currently it is possible to publish PDB and PE (exe and dll) files to a local file system.
 
