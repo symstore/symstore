@@ -21,7 +21,7 @@ class TestOpenCompressedEntry(testcase.TestCase):
         empty_dir = path.join(tempfile.mkdtemp(), "empty")
         self.symstore = symstore.Store(empty_dir)
 
-        transaction = self.symstore.new_transaction("prod", "0.0.0")
+        transaction = self.symstore.new_transaction("prod", "0.0.0", "")
         entry = transaction.new_entry(
             path.join(util.SYMFILES_DIR, "dummylib.pdb"), compress=True)
         transaction.add_entry(entry)

@@ -29,6 +29,13 @@ class TestNewStore(util.CliTester):
 
         self.assertSymstoreDir("new_store.zip")
 
+    def test_add_with_comment(self):
+        self.run_add_command(["--product-name", "dummyprod",
+                              "--comment", "a comment"],
+                             ["dummyprog.pdb"])
+
+        self.assertSymstoreDir("comment_store.zip")
+
     @unittest.skipIf(cab.compress is None, util.NO_COMP_SKIP)
     def test_add_compressed_pdb(self):
         self.run_add_command(["--compress", "--product-name", "dummyprod"],

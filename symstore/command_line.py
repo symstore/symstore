@@ -29,6 +29,9 @@ def parse_args():
     parser.add_argument("-r", "--product-version", default="",
                         help="Version of the product.")
 
+    parser.add_argument("-c", "--comment", default="",
+                        help="Comment for the transaction.")
+
     parser.add_argument("-s", "--skip-published",
                         action="store_true",
                         default=False,
@@ -73,14 +76,16 @@ def delete_action(sym_store, transaction_id):
         err_exit("no transaction with id '%s' found" % transaction_id)
 
 
-def add_action(sym_store, files, product_name, product_version, compress,
-               skip_published):
+def add_action(sym_store, files,
+               product_name, product_version, comment,
+               compress, skip_published):
     try:
         # error-out if no compression
         check_compression_support(compress)
 
         # create new add transaction, add all specified files
-        transaction = sym_store.new_transaction(product_name, product_version)
+        transaction = sym_store.new_transaction(product_name, product_version,
+                                                comment)
         for file in files:
             entry = transaction.new_entry(file, compress)
 
@@ -118,5 +123,5 @@ def main():
 
     # otherwise this is an 'add' action
     add_action(sym_store, args.files, args.product_name,
-               args.product_version, args.compress,
-               args.skip_published)
+               args.product_version, args.comment,
+               args.compress, args.skip_published)

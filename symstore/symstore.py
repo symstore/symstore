@@ -270,9 +270,9 @@ class Transaction:
         time_stamp = self.timestamp.strftime("%H:%M:%S")
 
         assert self._commited()
-        return """%s,%s,%s,%s,%s,"%s","%s","",""" % \
+        return """%s,%s,%s,%s,%s,"%s","%s","%s",""" % \
                (self.id, self.type, self.ref, date_stamp, time_stamp,
-                self.product, self.version)
+                self.product, self.version, self.comment)
 
 
 def parse_transaction_line(line):
@@ -557,8 +557,9 @@ class Store:
 
         os.utime(pingme_path, (timestamp, timestamp))
 
-    def new_transaction(self, product, version, type="add"):
-        return Transaction(self, type=type, product=product, version=version)
+    def new_transaction(self, product, version, comment, type="add"):
+        return Transaction(self, type=type, product=product,
+                           version=version, comment=comment)
 
     def delete_transaction(self, transaction_id):
         # look up the transaction to delete
