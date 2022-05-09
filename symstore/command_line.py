@@ -41,7 +41,7 @@ def parse_args():
 
     parser.add_argument("--version",
                         action="version",
-                        version="symstore %s" % symstore.VERSION,
+                        version="symstore %s" % symstore.__version__,
                         help="Show program's version number and exit.")
 
     parser.add_argument("store_path", metavar="STORE_PATH",

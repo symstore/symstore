@@ -1,0 +1,50 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "symstore"
+readme = "README.md"
+license = {file = "LICENSE"}
+dynamic = ["version", "description"]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 2.7",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.5",
+  "Programming Language :: Python :: 3.6",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+]
+
+[project.optional-dependencies]
+dev = [
+  "coverage",
+  "flake8",
+  "mock",
+]
+
+[project.urls]
+homepage = "https://github.com/symstore/symstore"
+documentation = "https://github.com/symstore/symstore#readme"
+repository = "https://github.com/symstore/symstore.git"
+changelog = "https://github.com/symstore/symstore#change-log"
+
+[project.scripts]
+symstore = "symstore.command_line:main"
+
+[tool.flit.module]
+name = "symstore"
+
+[tool.flit.sdist]
+exclude = [
+  "tests",
+  "test",
+  "Makefile",
+  ".travis.yml",
+  ".coveragerc",
+  ".gitignore",
+]

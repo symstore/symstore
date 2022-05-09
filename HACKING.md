@@ -6,6 +6,8 @@ Information on setting up development environment and running checks.
 
 The recommended set-up is to create a virtualenv sandbox and install the symstore package in the sandbox with pip.
 
+Note that you need to use _pip version 21.3_ or later to be able to install the package in development mode.
+
 Set-up and activate the sandbox with:
 
 .. code:: sh
@@ -26,7 +28,7 @@ Install the symstore package in developer mode:
 .. code:: sh
 
     $ cd src
-    $ pip install -e .[develop]
+    $ pip install -e .[dev]
 
 This will make in in-place installation of the symstore package.
 It will also install all the necessary tools for development.
@@ -90,12 +92,10 @@ Will run flake8 checks and integrations tests.
     [pypitest]
     repository=https://test.pypi.org/legacy/
 
-* pip install twine
+* pip install flit
 
-* make pkgs
-
-* twine upload -r pypitest dist/*
+* flit publish --repository=pypitest
 
 * check https://testpypi.python.org/pypi/symstore
 
-* twine upload -r pypi dist/*
+* flit publish
