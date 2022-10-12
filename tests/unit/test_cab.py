@@ -1,7 +1,7 @@
 import subprocess
-import mock
 import importlib
 import unittest
+from unittest import mock
 from symstore import CabCompressionError
 from tests import testcase
 

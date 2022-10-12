@@ -22,7 +22,6 @@ classifiers = [
 dev = [
   "coverage",
   "flake8",
-  "mock",
 ]
 
 [project.urls]

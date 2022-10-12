@@ -1,5 +1,5 @@
-import mock
 import unittest
+from unittest import mock
 
 from symstore import command_line, CabCompressionError
 

@@ -1,4 +1,4 @@
-import mock
+from unittest import mock
 from symstore import pdb
 from tests import testcase
 
