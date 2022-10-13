@@ -52,7 +52,7 @@ def _pdb_hash(pdbfile):
 
 
 def _pe_hash(pefile):
-    return "%X%X" % (pefile.TimeDateStamp, pefile.SizeOfImage)
+    return "%X%x" % (pefile.TimeDateStamp, pefile.SizeOfImage)
 
 
 def _probe_pe_hash(fname):

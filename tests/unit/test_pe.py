@@ -1,7 +1,9 @@
 from os import path
+from unittest.mock import Mock
 from tests import testcase
 from tests.cli import util
 from symstore import pe
+from symstore.symstore import _pe_hash
 
 
 # expected PE fields values
@@ -24,3 +26,26 @@ class TestPE(testcase.TestCase):
         # check that we got expected values
         self.assertEqual(pefile.TimeDateStamp, TIME_DATE_STAMP)
         self.assertEqual(pefile.SizeOfImage, SIZE_OF_IMAGE)
+
+
+def _make_pe_mock(time_date_stamp, size_of_image):
+    pe = Mock()
+    pe.TimeDateStamp = time_date_stamp
+    pe.SizeOfImage = size_of_image
+
+    return pe
+
+
+class TestPEHash(testcase.TestCase):
+    def test_hash(self):
+        pe_hash = _pe_hash(_make_pe_mock(1444402430, 32768))
+        self.assertEqual("5617D4FE8000", pe_hash)
+
+    def test_hash_lowcase(self):
+        """
+        get hash of an PE file,
+        where the 'size of image' contains a letter in hex,
+        thus we can check that the part of the hash is in lower case
+        """
+        pe_hash = _pe_hash(_make_pe_mock(1520452531, 512000))
+        self.assertEqual("5AA043B37d000", pe_hash)
