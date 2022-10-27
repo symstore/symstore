@@ -254,8 +254,7 @@ class Transaction:
         # publish all entries files to the store in parallel if more than one
         if len(self.entries) > 1:
             executor = concurrent.futures.ThreadPoolExecutor()
-            futures = [executor.submit(TransactionEntry.publish, entry) for entry in self.entries]
-            concurrent.futures.wait(futures)
+            executor.map(TransactionEntry.publish, self.entries)
         else:
             for entry in self.entries:
                 entry.publish()
