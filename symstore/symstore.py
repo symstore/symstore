@@ -117,8 +117,8 @@ class TransactionEntry:
         # Check if file is too large to compress.
         # Max is 0x7FFF8000 bytes, approx 1.99GiB
         try:
-            if (self.compressed
-                and os.path.getsize(self.source_file) >= 0x7FFF8000):
+            if (self.compressed and
+                    os.path.getsize(self.source_file) >= 0x7FFF8000):
                 self.compressed = False
         except OSError:
             pass
