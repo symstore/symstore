@@ -4,6 +4,7 @@ import os
 import re
 import time
 import shutil
+from concurrent.futures import ThreadPoolExecutor
 from os import path
 from symstore import pe
 from symstore import pdb
@@ -250,9 +251,14 @@ class Transaction:
         self.timestamp = now
         self.id = id
 
-        # publish all entries files to the store
-        for entry in self.entries:
-            entry.publish()
+        #
+        # publish entries in parallel,
+        # doing it in parallel speeds up the commit operation
+        # when there are multiple entries,
+        # specially when compression is requested
+        #
+        with ThreadPoolExecutor() as e:
+            e.map(lambda entry: entry.publish(), self.entries)
 
         # write new transaction file
         with self._entries_file("a") as efile:
