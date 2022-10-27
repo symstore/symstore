@@ -4,6 +4,7 @@ import os
 import re
 import time
 import shutil
+import concurrent.futures
 from os import path
 from symstore import pe
 from symstore import pdb
@@ -250,9 +251,14 @@ class Transaction:
         self.timestamp = now
         self.id = id
 
-        # publish all entries files to the store
-        for entry in self.entries:
-            entry.publish()
+        # publish all entries files to the store in parallel if more than one
+        if len(self.entries) > 1:
+            executor = concurrent.futures.ThreadPoolExecutor()
+            futures = [executor.submit(TransactionEntry.publish, entry) for entry in self.entries]
+            concurrent.futures.wait(futures)
+        else:
+            for entry in self.entries:
+                entry.publish()
 
         # write new transaction file
         with self._entries_file("a") as efile:
