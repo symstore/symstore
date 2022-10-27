@@ -114,11 +114,13 @@ class TransactionEntry:
         self.source_file = source_file
         self.compressed = compressed
 
-        # Check if file is too large to compress. Max is 0x7FFF8000 bytes, approx 1.99GiB
+        # Check if file is too large to compress.
+        # Max is 0x7FFF8000 bytes, approx 1.99GiB
         try:
-            if (self.compressed and os.path.getsize(self.source_file) >= 0x7FFF8000):
+            if (self.compressed
+                and os.path.getsize(self.source_file) >= 0x7FFF8000):
                 self.compressed = False
-        except:
+        except OSError:
             pass
 
     @classmethod
