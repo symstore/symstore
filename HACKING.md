@@ -10,8 +10,6 @@ Note that you need to use _pip version 21.3_ or later to be able to install the 
 
 Set-up and activate the sandbox with:
 
-.. code:: sh
-
     $ mkdir symstore
     $ cd symstore
     $ virtualenv sandbox
@@ -19,13 +17,9 @@ Set-up and activate the sandbox with:
 
 Clone the symstore repository:
 
-.. code:: sh
-
     $ git clone <repo-url> src
 
 Install the symstore package in developer mode:
-
-.. code:: sh
 
     $ cd src
     $ pip install -e .[dev]
@@ -38,8 +32,6 @@ It will also install all the necessary tools for development.
 
 To run all tests and checks goto the root directory of the repository and type:
 
-.. code:: sh
-
     $ make
 
 This will run all tests and perform flake8 static check on the code.
@@ -48,27 +40,19 @@ This will run all tests and perform flake8 static check on the code.
 
 The Makefile provides following targets:
 
-.. code:: sh
-
     $ make flake8
 
 Runs flake8 tool on all the source code.
 Performs static checks and checks PEP8 style conformance.
 
-.. code:: sh
-
     $ make check
 
 Runs all the integration tests.
-
-.. code:: sh
 
     $ make cov
 
 Runs all the tests and generates a coverage report.
 Stores the report in ``htmlcov`` directory.
-
-.. code:: sh
 
     $ make all
 
@@ -78,8 +62,6 @@ Will run flake8 checks and integrations tests.
 ## Making a Release to PyPi
 
 * create ~/.pypirc
-
-.. code:: ini
 
     [distutils]
     index-servers =
