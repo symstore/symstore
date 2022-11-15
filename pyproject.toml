@@ -20,6 +20,8 @@ classifiers = [
 
 [project.optional-dependencies]
 dev = [
+  "pytest",
+  "pytest-cov",
   "coverage",
   "flake8",
 ]

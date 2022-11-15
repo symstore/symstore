@@ -1,15 +1,14 @@
 all: check flake8
 
 flake8:
-	flake8 . test
+	flake8 .
 
 check:
-	./test
+	pytest
 
 cov:
 	coverage erase
-	./test --coverage
-	coverage combine
+	pytest --cov=. tests
 	coverage html
 
 loc:
