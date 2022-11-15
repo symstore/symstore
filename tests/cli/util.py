@@ -7,7 +7,6 @@ import subprocess
 import platform
 from os import path
 from datetime import datetime
-from distutils import spawn
 
 import symstore
 
@@ -16,7 +15,7 @@ from tests import conf, testcase
 # the message when skipping compression tests
 NO_COMP_SKIP = "gcab not available, compression not supported on this system"
 
-SYMSTORE_COMMAND = spawn.find_executable("symstore")
+SYMSTORE_COMMAND = shutil.which("symstore")
 
 SYMFILES_DIR = path.join(path.dirname(__file__), "symfiles")
 
