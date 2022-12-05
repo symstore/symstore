@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import sys
 import argparse
 import symstore
+from pathlib import Path
 
 
 class CompressionNotSupported(Exception):
@@ -22,6 +23,11 @@ def parse_args():
     parser.add_argument("-z", "--compress",
                         action="store_true",
                         help="Publish compressed files.")
+
+    parser.add_argument("-m", "--max-compress",
+                        type=int, default=None,
+                        help="Specifies maximum size of files to compress. "
+                             "File above the limit are published uncompressed.")
 
     parser.add_argument("-p", "--product-name", default="",
                         help="Name of the product.")
@@ -78,7 +84,27 @@ def delete_action(sym_store, transaction_id):
 
 def add_action(sym_store, files,
                product_name, product_version, comment,
-               compress, skip_published):
+               compress, max_compress, skip_published):
+
+    def _compress_file(file):
+        """
+        makes a decision if the file should be published compressed
+        """
+
+        if not compress:
+            # compression is disabled for this transaction
+            return False
+
+        if max_compress is None:
+            # compression is enabled,
+            # but there is no file size specified
+            return True
+
+        # only compress if the file is inside
+        # the compression file size limit
+        file_size = Path(file).stat().st_size
+        return file_size <= max_compress
+
     try:
         # error-out if no compression
         check_compression_support(compress)
@@ -87,10 +113,10 @@ def add_action(sym_store, files,
         transaction = sym_store.new_transaction(product_name, product_version,
                                                 comment)
         for file in files:
-            entry = transaction.new_entry(file, compress)
+            entry = transaction.new_entry(file, _compress_file(file))
 
             if skip_published and entry.exists():
-                # 'skip published' mode is on and this files
+                # 'skip published' mode is on and this file
                 # have already been published, skip it skipper
                 continue
 
@@ -115,6 +141,7 @@ def add_action(sym_store, files,
 
 def main():
     args = parse_args()
+
     sym_store = symstore.Store(args.store_path)
 
     if args.delete is not None:
@@ -124,4 +151,5 @@ def main():
     # otherwise this is an 'add' action
     add_action(sym_store, args.files, args.product_name,
                args.product_version, args.comment,
-               args.compress, args.skip_published)
+               args.compress, args.max_compress,
+               args.skip_published)

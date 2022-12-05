@@ -43,6 +43,13 @@ class TestNewStore(util.CliTester):
 
         self.assertSymstoreDir("new_store_compressed.zip")
 
+    @unittest.skipIf(cab.compress is None, util.NO_COMP_SKIP)
+    def test_add_max_compress(self):
+        self.run_add_command(["--compress", "--max-compress", "5000"],
+                             ["dummylib.dll", "dummylib.pdb", "dummyprog.exe"])
+
+        self.assertSymstoreDir("max_compress.zip")
+
 
 class TestAlternativeExtensions(util.CliTester):
     """
