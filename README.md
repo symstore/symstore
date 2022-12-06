@@ -90,6 +90,15 @@ The `makecab.exe` utility normally is included by default in Windows installatio
 
 ## Change Log
 
+### 0.3.4 (6 December 2022)
+
+* adds support for transaction comments (`--comment` cli argument)
+* parallelized transaction publication code (pull request #26)
+* `--max-compress` cli argument to disable compression on big files (pull request #27)
+* fixed issue with wrong symstore paths of some PE-files (issue #25)
+* dropped support for python 2.7, 3.4, 3.5
+* officially support python 3.11
+
 ### 0.3.3 (30 September 2021)
 
 * add `--skip-published` cli flag (pull request #19)
