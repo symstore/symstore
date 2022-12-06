@@ -13,7 +13,7 @@ from symstore.errs import FileNotFound
 from symstore.errs import TransactionNotFound
 from symstore.errs import CabCompressionError
 
-__version__ = "0.dev0"
+__version__ = "0.3.4"
 
 __all__ = [
     "Store",
