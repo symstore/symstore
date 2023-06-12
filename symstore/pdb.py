@@ -1,8 +1,5 @@
-from __future__ import absolute_import
-
 import math
 import struct
-import binascii
 from symstore import fileio
 
 SIGNATURE = b"Microsoft C/C++ MSF 7.00\r\n\x1ADS\0\0\0"
@@ -155,7 +152,7 @@ class GUID:
         self.data4 = data4
 
     def __str__(self):
-        data4_str = binascii.hexlify(self.data4).decode("utf-8").upper()
+        data4_str = self.data4.hex().upper()
 
         return "%.8X%.4X%.4X%s" % \
                (self.data1, self.data2, self.data3, data4_str)
