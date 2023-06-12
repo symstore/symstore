@@ -40,16 +40,7 @@ PINGME_FILE = "pingme.txt"
 
 
 def _pdb_hash(pdbfile):
-    # figure out age string to be used in the hash string
-    if pdbfile.age is None:
-        # some pdb files does not have age,
-        # according to symstore.exe we should just
-        # skip adding the age to the hash string
-        age_str = ""
-    else:
-        age_str = "%x" % pdbfile.age
-
-    return "%s%s" % (pdbfile.guid, age_str)
+    return "%s%s" % (pdbfile.guid, pdbfile.age_str)
 
 
 def _pe_hash(pefile):
