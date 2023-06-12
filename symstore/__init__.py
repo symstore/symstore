@@ -1,7 +1,6 @@
 """
 publish PDB and PE files to symbols store
 """
-from __future__ import absolute_import
 from symstore.symstore import Store
 from symstore.symstore import Transactions
 from symstore.symstore import History
