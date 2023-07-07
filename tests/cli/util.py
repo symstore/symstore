@@ -147,8 +147,11 @@ class CliTester(testcase.TestCase):
         self.recordStartTime()
 
         self.symstore_path = tempfile.mkdtemp()
-        zfile = _open_zip(self.initial_dir_zip)
 
+        if self.initial_dir_zip is None:
+            return
+
+        zfile = _open_zip(self.initial_dir_zip)
         zfile.extractall(self.symstore_path)
 
     def tearDown(self):

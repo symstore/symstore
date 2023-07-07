@@ -8,7 +8,12 @@ A python module and command line utility for publishing windows debugging symbol
 The symbols published in this format can be consumed by the common development tools for windows, such as Visual Studio and WinDbg.
 See [Using SymStore](https://docs.microsoft.com/en-us/windows/win32/debug/using-symstore) for more information on windows symbols store.
 
-Currently it is possible to publish PDB and PE (exe and dll) files to a local file system.
+This package make it possible to publishing debugging files to a local file system.
+Supported file formats are:
+
+ * native PDB
+ * portable PDB
+ * PE (exe and dll) files
 
 ## Installing
 

@@ -51,6 +51,21 @@ class TestNewStore(util.CliTester):
         self.assertSymstoreDir("max_compress.zip")
 
 
+class TestDotNetFiles(util.CliTester):
+    """
+    Test publishing .NET binaries.
+
+    Most notably the *.pdb here are in 'Portable PDB' format,
+    i.e. a different format compared to (old) 'native PDB' format.
+    """
+    def test_add(self):
+        self.run_add_command(["--product-name", "prod"],
+                             ["cli_app_net.exe", "cli_app_net.dll", "cli_app_net.pdb",
+                              "cli_lib_net.pdb", "gui_app_net.pdb"])
+
+        self.assertSymstoreDir("netsyms.zip")
+
+
 class TestAlternativeExtensions(util.CliTester):
     """
     Test the case when files have non-standard extensions.

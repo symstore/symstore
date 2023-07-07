@@ -9,6 +9,7 @@ from symstore import pdb
 from symstore import cab
 from symstore import errs
 from symstore import fileio
+from symstore import port_pdb
 from datetime import datetime
 
 
@@ -85,14 +86,28 @@ def _probe_pdb_hash(fname):
     return _pdb_hash(pdbfile)
 
 
+def _probe_portable_pdb_hash(fname):
+    try:
+        pdb_id = port_pdb.parse_pdb_id(fname)
+    except port_pdb.InvalidSignature:
+        return None
+
+    return f"{pdb_id}1"
+
+
 def _file_hash(fname):
     # first try parsing as PE file
     hash = _probe_pe_hash(fname)
     if hash is not None:
         return hash
 
-    # then try to parse as PDB file
+    # then try to parse as (native) PDB file
     hash = _probe_pdb_hash(fname)
+    if hash is not None:
+        return hash
+
+    # then try to parse as portable PDB file
+    hash = _probe_portable_pdb_hash(fname)
     if hash is not None:
         return hash
 
