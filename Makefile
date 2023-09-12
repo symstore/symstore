@@ -4,7 +4,7 @@ flake8:
 	flake8 .
 
 check:
-	pytest
+	pytest --verbosity=1
 
 cov:
 	coverage erase

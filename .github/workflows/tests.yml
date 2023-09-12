@@ -1,0 +1,30 @@
+name: Tests
+on: [push, workflow_dispatch]
+jobs:
+  Python:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11"]
+    steps:
+      - uses: actions/checkout@v3
+
+      #
+      # it seems we can't get access to system-site-packages when running tests,
+      # https://github.com/actions/setup-python/issues/178
+      # don't waste time installing gcab deb packages
+      #
+      #
+      # - name: install gcab packages
+      #  run: sudo apt-get update && sudo apt-get install -y gir1.2-gcab-1.0 python-gi
+      #
+      - name: set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install symstore package
+        run: pip install -e .[dev]
+
+      - name: run tests
+        run: make
