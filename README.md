@@ -107,6 +107,10 @@ The `makecab.exe` utility normally is included by default in Windows installatio
 
 ## Change Log
 
+### 0.4.0 (TBD)
+
+* add support for Portable PDB files (used by .Net projects)
+
 ### 0.3.4 (6 December 2022)
 
 * adds support for transaction comments (`--comment` cli argument)
