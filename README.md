@@ -84,6 +84,23 @@ If symstore is unable to load required packages while compression mode is reques
 
     gcab module not available, compression not supported
 
+#### Virtual Environments
+
+When installing symstore inside virtual environment, care needs to be taken in order to make compression work.
+The ``gcab`` library and it's bindings must be accessible from the virtual environment.
+
+This can be accomplished by enabling access to ``system site packages`` inside the environment.
+When creating the environment with ``venv`` or ``virtualenv``, use ``--system-site-packages`` flag
+to enable access.
+
+Below is an example of enabling access to system site packages when using ``venv`` module.
+
+    $ python3 -m venv --system-site-packages  <evironment-name>
+
+Note that the ``gcab`` packages listed above needs to be installed before creating the virtual environment.
+
+#### Windows
+
 On Windows systems, symstore uses the standard `makecab.exe` utility.
 The `makecab.exe` utility normally is included by default in Windows installations, thus symstore compression will work out-of-box.
 
