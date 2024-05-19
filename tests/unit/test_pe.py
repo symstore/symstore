@@ -49,3 +49,14 @@ class TestPEHash(testcase.TestCase):
         """
         pe_hash = _pe_hash(_make_pe_mock(1520452531, 512000))
         self.assertEqual("5AA043B37d000", pe_hash)
+
+    def test_low_values_padding(self):
+        """
+        Test that low time stamp and size value are correctly
+        prefixed with 0.
+
+        The time stamp part should always be 8 chars long,
+        the size 4 chars long.
+        """
+        pe_hash = _pe_hash(_make_pe_mock(77794544, 2048))
+        self.assertEqual("04A30CF00800", pe_hash)
