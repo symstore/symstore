@@ -39,6 +39,10 @@ To install it, activate your conda environment and run:
 
     $ conda install --channel conda-forge symstore
 
+To enable compression support, additionally install ``gcab`` and ``pygobject`` packages.
+
+    $ conda install --channel conda-forge gcab pygobject
+
 ## Using
 
 ### command line
