@@ -1,11 +1,17 @@
 import math
+import os
 import struct
 from symstore import fileio
 
 SIGNATURE = b"Microsoft C/C++ MSF 7.00\r\n\x1ADS\0\0\0"
+PORTABLE_SIGNATURE = b"BSJB"
 
 
 class PDBInvalidSignature(Exception):
+    pass
+
+
+class PDBMissingStream(Exception):
     pass
 
 
@@ -175,9 +181,17 @@ class PDBFile:
 
             # Check signature
             sig = f.read(len(SIGNATURE))
-            if sig != SIGNATURE:
-                raise PDBInvalidSignature()
+            if sig == SIGNATURE:
+                self._read_pdb(f)
+            else:
+                f.seek(0)
+                sig = f.read(len(PORTABLE_SIGNATURE))
+                if sig == PORTABLE_SIGNATURE:
+                    self._read_portable_pdb(f)
+                else:
+                    raise PDBInvalidSignature()
 
+    def _read_pdb(self, f):
             # load page size and root stream definition
             page_size, _, _, root_dir_size, _ = \
                 struct.unpack("<IIIII", f.read(4*5))
@@ -199,12 +213,59 @@ class PDBFile:
             if 0 < len(dbi_stream_pages):
                 f.seek(dbi_stream_pages[0]*page_size)
                 _, _, age = struct.unpack("<III", f.read(3*4))
+                # Regular PDB age parameters use lowercase hex for the signature, unlike portable PDBs
+                age_str = "%x" % age
             else:
                 # vc140.pdb however, does not have this stream,
                 # so it does not have an age that can be used
                 # in the hash string
                 age = None
+                # according to symstore.exe we should just
+                # skip adding the age to the hash string
+                age_str = ""
 
             # store GUID and age for user friendly retrieval
             self.guid = GUID(guid_d1, guid_d2, guid_d3, guid_d4)
             self.age = age
+            self.age_str = age_str
+
+    def _read_portable_pdb(self, pdb_file):
+        # Documented in https://www.ecma-international.org/wp-content/uploads/ECMA-335_2nd_edition_december_2002.pdf
+        # See partition II, chapter 23 for details
+        # Seek past the MinorVersion and MajorVersion, which are hardcoded to 1 and ignored
+        pdb_file.seek(8, os.SEEK_CUR)
+        version_length, = struct.unpack("<I", pdb_file.read(4))
+        # Stream data starts after version and then the 2-byte Flags field (which is ignored)
+        pdb_file.seek(version_length + 2, os.SEEK_CUR)
+        num_streams, = struct.unpack("<H", pdb_file.read(2))
+
+        for stream_index in range(num_streams):
+            # Offset is relative to the start of the file header (so absolute for  pdb_file, where the header is at
+            # the start)
+            offset, _size = struct.unpack("<II", pdb_file.read(8))
+            stream_name = b""
+            while True:
+                # Names are aligned to closest 4 bytes, so read 4 byte blocks until we find a terminating NUL
+                block = pdb_file.read(4)
+                terminator_index = block.find(b"\x00")
+                if terminator_index == -1:
+                    stream_name += block
+                else:
+                    stream_name += block[:terminator_index]
+                    break
+
+            stream_name = stream_name.decode("utf-8")
+            if stream_name == "#Pdb":
+                # "#Pdb" stream is documented here:
+                # https://github.com/dotnet/runtime/blob/v7.0.5/docs/design/specs/PortablePdb-Metadata.md#standalone-debugging-metadata
+                pdb_file.seek(offset, os.SEEK_SET)
+                guid_d1, guid_d2, guid_d3, guid_d4 = struct.unpack("<IHH8s", pdb_file.read(4 + 2 * 2 + 8))
+                self.guid = GUID(guid_d1, guid_d2, guid_d3, guid_d4)
+                # Timestamp is hardcoded to FFFFFFFF in Portable PDBs, so ignore the one encoded in the header, per:
+                # https://github.com/dotnet/symstore/blob/9c9ef5d6c845826e433f70a29f4d80bf7108e451/docs/specs/SSQP_Key_Conventions.md#portable-pdb-signature
+                self.age = 0xFFFFFFFF
+                # Portable PDB age parameters use uppercase hex for the signature, unlike regular PDBs
+                self.age_str = "%X" % self.age
+                return
+
+        raise PDBMissingStream()
