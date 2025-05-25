@@ -111,6 +111,12 @@ The `makecab.exe` utility normally is included by default in Windows installatio
 
 ## Change Log
 
+### 0.3.5 (25 May 2025)
+
+* pad PE hash values correctly (issue #36)
+* dropped support for python 3.6
+* officially support python 3.12 and 3.13
+
 ### 0.3.4 (6 December 2022)
 
 * adds support for transaction comments (`--comment` cli argument)
